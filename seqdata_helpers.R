@@ -229,6 +229,39 @@ performSTARAlignment = function(filename_one, filename_two = '', output_path, qu
   }
 }
 
+
+# Variant calling ---------------------------------------------------------
+
+callGermlineAndSomaticVariants = function(normal_bam, tumor_bam, ref_genome) {
+	if (any(!sapply(c(normal_bam, tumor_bam, ref_genome), file.exists))) {
+		stop('Please check bam file and/or ref genome paths')
+	}
+
+	normal_pileup = paste(tool_paths$general$samtools,
+												'mpileup',
+												'-q', 1,
+												'-f', ref_genome,
+												normal_bam)
+	tumor_pileup = paste(tool_paths$general$samtools,
+												'mpileup',
+												'-q', 1,
+												'-f', ref_genome,
+												tumor_bam)
+
+	command = paste('java -jar', tool_paths$variant_calling$varscan2, 'somatic',
+									'<(', normal_pileup,')', '<(', tumor_pileup, ')', basename(tumor_bam))
+
+	if (execute) {
+		system(command = paste("nice -n 19", command),
+					 intern = FALSE,
+					 wait = TRUE)
+	} else {
+		message(paste("nice -n 19", command, '\n'))
+	}
+}
+
+# RNA quantification ------------------------------------------------------
+
 # quantify using cufflinks
 performCufflinksQuantification = function(filename, output_path, execute = TRUE) {
   command = paste(tool_paths$quantify$cufflinks,
