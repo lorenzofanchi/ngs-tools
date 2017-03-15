@@ -8,38 +8,40 @@ tool_paths = list(general = list(gffread = 'gffread',
 																 samtools = '~/libs/samtools-1.3/bin/samtools',
 																 picard = '~/libs/picard-tools-1.141/picard.jar',
 																 trimmomatic = '~/libs/Trimmomatic-0.36/trimmomatic-0.36.jar'),
-									
+
 									align = list(bowtie2 = '~/libs/bowtie2-2.2.8/bowtie2',
 															 tophat2 = '~/libs/tophat-2.1.1.Linux_x86_64/tophat2',
 															 star = "~/libs/STAR-2.5.2b/bin/Linux_x86_64/STAR"),
-									
+
 									quality_check = list(fastqc = '~/libs/FastQC/fastqc',
 																			 rseqc = '~/libs/RSeQC-2.6.3/scripts'),
-									
+
 									quantify = list(cufflinks = "~/libs/cufflinks-2.2.1-patched/cufflinks",
-																	salmon = '~/libs/Salmon-0.8.0_linux_x86_64/bin/salmon'))
+																	salmon = '~/libs/Salmon-0.8.0_linux_x86_64/bin/salmon'),
+
+									variant_calling = list(varscan2 = '~libs/varscan2-2.4.3/VarScan.v2.4.3.jar'))
 
 tool_options = list(general = list(parallel_threads = 18),
-										
+
 										cufflinks = list(gtf_annotation = '~/resources',
 																		 gtf_mask_annotation = '~/resources'),
-										
+
 										rseqc = list(bed_reference = '~/resources/hg19_Ensembl.bed.gz'),
-										
+
 										salmon = list(fasta_dna = '~/resources/ensembl_81/fasta_dna/Homo_sapiens.GRCh38.81.dna.primary_assembly.fa',
 																	gtf_annotation = '~/resources/ensembl_81/gtf/Homo_sapiens.GRCh38.81_no-contigs.gtf',
 																	fasta_transcripts = '~/resources/ensembl_81/fasta_transcripts/Homo_sapiens.GRCh38.81.transcripts_no-contigs.fa'),
-										
+
 										star = list(index = '~/resources/ensembl_81/star_index',
 																read_files_command = 'zcat',
 																out_sam_type = 'BAM SortedByCoordinate',
 																quant_mode = 'TranscriptomeSAM'),
-										
+
 										tophat2 = list(library_type = 'fr-unstranded',
 																	 sam_strand_field = 'intronMotif', # for unstranded Illumina RNAseq use "intronMotif", for stranded use "None"
 																	 bowtie2_index = '~/resources',
 																	 bowtie2_transcriptome_index = '~/resources'),
-										
+
 										trimmomatic = list(phred_encoding = '-phred33',
 																			 adaptor_sequences = '~/libs/Trimmomatic-0.36/adapters/Illumina_TruSeq_Adapters.fa'))
 
@@ -51,12 +53,12 @@ sortBamByNameUsingSamtools = function(file, execute = TRUE) {
                   '-n',
                   file,
                   '-o', file.path(dirname(file), paste0(gsub('.bam', '', basename(file)), '-sorted.bam')))
-  
+
   if (execute) {
     system(command = command,
-           wait = TRUE)  
+           wait = TRUE)
   } else {
-    message(command) 
+    message(command)
   }
 }
 
@@ -68,7 +70,7 @@ convertBamToFastqUsingPicard = function(file, execute = TRUE) {
 													 '-f',
 													 '0x2',
 													 file)
-	
+
 	command_picard = paste('java',
 												 '-Xmx6g',
 												 '-jar', tool_paths$general$picard,
@@ -79,14 +81,14 @@ convertBamToFastqUsingPicard = function(file, execute = TRUE) {
 												 paste0('SECOND_END_FASTQ=', file.path(dirname(file), paste0(gsub('.bam', '', basename(file)), '_2.fastq'))),
 												 paste0('UNPAIRED_FASTQ=', file.path(dirname(file), paste0(gsub('.bam', '', basename(file)), '_unpaired.fastq')))
 	)
-	
+
 	command = paste(command_samtools, command_picard, sep = ' | ')
-  
+
   if (execute) {
     system(command = command,
-           wait = TRUE)  
+           wait = TRUE)
   } else {
-    message(command) 
+    message(command)
   }
 }
 
@@ -98,7 +100,7 @@ convertBamToFastqUsingBedtools = function(file, execute = TRUE) {
 									'-fq', file.path(dirname(file), paste0(gsub('.bam', '', basename(file)), '_1.fastq')),
 									'-fq2', file.path(dirname(file), paste0(gsub('.bam', '', basename(file)), '_2.fastq'))
 	)
-	
+
 	if (execute) {
 		system(command = command,
 					 wait = TRUE)
@@ -107,16 +109,19 @@ convertBamToFastqUsingBedtools = function(file, execute = TRUE) {
 	}
 }
 
+
+# Quality control ---------------------------------------------------------
+
 # perform QC using FastQC
 performFastQC = function(file, execute = TRUE) {
   command = paste(tool_paths$quality_check$fastqc,
                   paste0("--outdir=", dirname(file)),
                   file)
-  
+
   if (grepl('\\.gz$', file)) {
   	command = paste('zcat', file, '|', tool_paths$quality_check$fastqc, paste0("--outdir=", dirname(file)), 'stdin')
   }
-  
+
   if (execute) {
   	system(command = command,
   				 wait = TRUE)
@@ -144,7 +149,7 @@ performTrimmingUsingTrimmomatic = function(filename_one, filename_two, output_pa
                   'SLIDINGWINDOW:4:15',
                   'MINLEN:16'
                   )
-  
+
   if (execute) {
     system(command = paste("nice -n 19", command),
            intern = TRUE,
@@ -160,7 +165,7 @@ inferStrandednessUsingRSeQC = function(bam_file, execute = TRUE) {
 									file.path(tool_paths$quality_check$rseqc, 'infer_experiment.py'),
 									'-i', bam_file,
 									'-r', tool_options$rseqc$bed_reference)
-	
+
 	if (execute) {
 		system(command = paste("nice -n 19", command),
 					 intern = TRUE,
@@ -169,6 +174,9 @@ inferStrandednessUsingRSeQC = function(bam_file, execute = TRUE) {
 		message(paste("nice -n 19", command))
 	}
 }
+
+
+# Read alignment ----------------------------------------------------------
 
 # align using tophat2
 performTophat2Alignment = function(filename_one, filename_two, output_path, execute = TRUE) {
@@ -183,7 +191,7 @@ performTophat2Alignment = function(filename_one, filename_two, output_path, exec
                   paste0('--transcriptome-index=', tool_options$tophat2$bowtie2_transcriptome_index),
   								tool_options$tophat2$bowtie2_index,
                   paste(filename_one, filename_two, sep=","))
-  
+
   if (execute) {
     system(command = paste("nice -n 19", command),
            intern = TRUE,
@@ -197,7 +205,7 @@ performTophat2Alignment = function(filename_one, filename_two, output_path, exec
 performSTARAlignment = function(filename_one, filename_two = '', output_path, quant_mode = 'salmon', execute = TRUE) {
 	dir.create(file.path(output_path, gsub('_L[0-9]{3}.+|_merged.+|\\.[^.]+', '', basename(filename_one))),
 						 showWarnings = F)
-	
+
   command = paste(tool_paths$align$star,
                   "--runThreadN", tool_options$general$parallel_threads,
                   "--genomeDir", tool_options$star$index,
@@ -211,7 +219,7 @@ performSTARAlignment = function(filename_one, filename_two = '', output_path, qu
   											 'none' = '',
   											 'salmon' = paste('--quantMode', tool_options$star$quant_mode))
   								)
-  
+
   if (execute) {
     system(command = paste("nice -n 19", command),
            intern = FALSE,
@@ -231,11 +239,11 @@ performCufflinksQuantification = function(filename, output_path, execute = TRUE)
                   "-M", tool_options$cufflinks$gtf_mask_annotation,
                   "-o", output_path,
                   filename)
-  
+
   if (execute) {
     system(command = paste("nice -n 19", command),
            intern = FALSE,
-           wait = TRUE)  
+           wait = TRUE)
   } else {
     message(paste("nice -n 19", command, '\n'))
   }
@@ -245,7 +253,7 @@ performCufflinksQuantification = function(filename, output_path, execute = TRUE)
 performSalmonQuantification = function(filename, output_path, execute = TRUE) {
 	dir.create(file.path(output_path, gsub('_{0,1}Aligned.+', '', basename(filename))),
 						 showWarnings = F)
-	
+
 	command = paste(tool_paths$quantify$salmon,
 									'quant',
 									'-p', tool_options$general$parallel_threads,
@@ -253,11 +261,11 @@ performSalmonQuantification = function(filename, output_path, execute = TRUE) {
 									'-t', tool_options$salmon$fasta_transcripts,
 									'-a', filename,
 									'-o', file.path(output_path, gsub('_{0,1}Aligned.+', '', basename(filename))))
-	
+
 	if (execute) {
 		system(command = paste("nice -n 19", command),
 					 intern = FALSE,
-					 wait = TRUE)  
+					 wait = TRUE)
 	} else {
 		message(paste("nice -n 19", command, '\n'))
 	}
@@ -267,7 +275,7 @@ generateTranscriptomeFasta = function(execute = F) {
 	command = paste(tool_paths$general$gffread,
 									'-w', tool_options$salmon$fasta_transcripts,
 									'-g', tool_options$salmon$fasta_dna, tool_options$salmon$gtf_annotation)
-	
+
 	if (execute) {
 		system(command = command,
 					 intern = F,
@@ -284,7 +292,7 @@ generateStarIndex = function(execute = F) {
 									'--genomeDir', tool_options$star$index,
 									'--genomeFastaFiles', tool_options$salmon$fasta_dna,
 									'--sjdbGTFfile', tool_options$salmon$gtf_annotation)
-	
+
 	if (execute) {
 		system(command = command,
 					 intern = F,
@@ -303,20 +311,20 @@ mergeEnsgInfo = function(quant_file, enst_ensg_table_path = '', gtf_path = NULL,
 		stop('ENST-ENSG path does not exist. Please supply correct path or path to GTF annotation file to generate ENST-ENSG table')
 	} else if (file.exists(gtf_path) & enst_ensg_table_path != '') {
 		message('Generating new ENST-ENSG conversion table from: ', gtf_path)
-		
+
 		gtf = readGFF(gtf_path)
-		
+
 		ensg_enst_table = unique(x = subset(x = gtf,
 																				subset = !is.na(gtf$transcript_id),
 																				select = c('gene_id', 'transcript_id')),
 														 by = c('gene_id', 'transcript_id'))
-		
+
 		dir.create(dirname(enst_ensg_table_path), showWarnings = F)
-		write.table(x = ensg_enst_table, file = enst_ensg_table_path, sep = '\t', row.names = F)	
+		write.table(x = ensg_enst_table, file = enst_ensg_table_path, sep = '\t', row.names = F)
 	} else {
 		stop('Please supply enst_ensg_table_path & gtf_path to generate ENST-ENSG conversion table')
 	}
-	
+
 	quant_data = setNames(object = lapply(quant_file, fread, col.names = c('transcript_id', 'transcript_length_bp', 'effective_length', 'tpm', 'read_number')),
 												nm = sapply(quant_file, function(path) unlist(strsplit(x = path, split = '/'))[length(unlist(strsplit(x = path, split = '/'))) - 1], USE.NAMES = F))
 
@@ -330,7 +338,7 @@ mergeEnsgInfo = function(quant_file, enst_ensg_table_path = '', gtf_path = NULL,
 																		neworder = c('gene_id', 'transcript_id', 'transcript_length_bp', 'effective_length', 'tpm', 'read_number'))
 												return(data)
 											})
-	
+
 	if (aggregate_by_ensg) {
 		quant_data = lapply(quant_data,
 												function(dt) {
