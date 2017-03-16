@@ -230,7 +230,7 @@ performSTARAlignment = function(filename_one, filename_two = '', output_path, qu
   }
 }
 
-performMiXcrAlignment = function(filename_one, filename_two, species = 'hsa', mode = 'default', source = 'transcriptomic') {
+performMiXcrAlignment = function(filename_one, filename_two = NULL, species = 'hsa', mode = 'default', source = 'transcriptomic') {
 	command = paste(tool_paths$align$mixcr,
 									'align',
 									'--threads', tool_options$general$parallel_threads,
