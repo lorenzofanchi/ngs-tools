@@ -229,6 +229,96 @@ performSTARAlignment = function(filename_one, filename_two = '', output_path, qu
   }
 }
 
+performMiXcrAlignment = function(filename_one, filename_two, species = 'hsa', mode = 'default', source = 'transcriptomic') {
+	command = paste(tool_paths$align$mixcr,
+									'align',
+									'--threads', tool_options$general$parallel_threads,
+									'--parameters', mode,
+									'--species', species,
+									if (mode == 'rna-seq') {'-OallowPartialAlignments=true'},
+									if (source == 'genomic') {'-OvParameters.geneFeatureToAlign=VGeneWithP'},
+									'--report', paste0(gsub('[LS][0-9]{2,3}.+', '', filename_one), 'log.txt'),
+									paste(filename_one, filename_two),
+									paste0(gsub('[LS][0-9]{2,3}.+', '', filename_one), 'alignments.vdjca')
+	)
+
+	if (execute) {
+		system(command = paste("nice -n 19", command),
+					 intern = FALSE,
+					 wait = TRUE)
+	} else {
+		message(paste("nice -n 19", command, '\n'))
+	}
+}
+
+performMiXcrContigAssembly = function(alignments) {
+	command = paste(tool_paths$align$mixcr,
+									'assemblePartial',
+									alignments,
+									paste0(gsub('\\.[^.]+$', '', alignments), '_rescued.vdjca')
+	)
+
+	if (execute) {
+		system(command = paste("nice -n 19", command),
+					 intern = FALSE,
+					 wait = TRUE)
+	} else {
+		message(paste("nice -n 19", command, '\n'))
+	}
+}
+
+performMiXcrAlignmentExtension = function(rescued_alignments) {
+	command = paste(tool_paths$align$mixcr,
+									'extendAlignments',
+									rescued_alignments,
+									paste0(gsub('\\.[^.]+$', '', rescued_alignments), '_extended.vdjca')
+	)
+
+	if (execute) {
+		system(command = paste("nice -n 19", command),
+					 intern = FALSE,
+					 wait = TRUE)
+	} else {
+		message(paste("nice -n 19", command, '\n'))
+	}
+}
+
+performMiXcrClonotypeAssembly = function(alignments) {
+	command = paste(tool_paths$align$mixcr,
+									'assemble',
+									alignments,
+									paste0(gsub('\\.[^.]+$', '', alignments), '_clones.vdjca')
+	)
+
+	if (execute) {
+		system(command = paste("nice -n 19", command),
+					 intern = FALSE,
+					 wait = TRUE)
+	} else {
+		message(paste("nice -n 19", command, '\n'))
+	}
+}
+
+performMiXcrCloneExport = function(clones, chain) {
+	command = paste(tool_paths$align$mixcr,
+									'exportClones',
+									if (is.character(chain)) {paste('-c', chain)},
+									clones,
+									if (is.character(chain)) {
+										paste0(gsub('\\.[^.]+$', '', alignments), '_clones.', chain, '.txt')
+									} else {
+										paste0(gsub('\\.[^.]+$', '', alignments), '_clones.txt')
+									}
+	)
+
+	if (execute) {
+		system(command = paste("nice -n 19", command),
+					 intern = FALSE,
+					 wait = TRUE)
+	} else {
+		message(paste("nice -n 19", command, '\n'))
+	}
+}
 
 # Variant calling ---------------------------------------------------------
 
