@@ -191,7 +191,7 @@ performTophat2Alignment = function(filename_one, filename_two, output_path, exec
                   '-o', dirname(filename_one),
                   paste0('--transcriptome-index=', tool_options$tophat2$bowtie2_transcriptome_index),
   								tool_options$tophat2$bowtie2_index,
-                  paste(filename_one, filename_two, sep=","))
+                  paste(filename_one, filename_two, sep = ','))
 
   if (execute) {
     system(command = paste("nice -n 19", command),
