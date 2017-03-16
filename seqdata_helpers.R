@@ -6,12 +6,13 @@ suppressPackageStartupMessages(library(rtracklayer))
 # general parameters
 tool_paths = list(general = list(gffread = 'gffread',
 																 samtools = '~/libs/samtools-1.3/bin/samtools',
-																 picard = '~/libs/picard-tools-1.141/picard.jar',
+																 picard = '~/libs/picard-tools-2.9.0/picard.jar',
 																 trimmomatic = '~/libs/Trimmomatic-0.36/trimmomatic-0.36.jar'),
 
 									align = list(bowtie2 = '~/libs/bowtie2-2.2.8/bowtie2',
+															 mixcr = '~/libs/mixcr-2.1.1/mixcr',
 															 tophat2 = '~/libs/tophat-2.1.1.Linux_x86_64/tophat2',
-															 star = "~/libs/STAR-2.5.2b/bin/Linux_x86_64/STAR"),
+															 star = '~/libs/STAR-2.5.2b/bin/Linux_x86_64/STAR'),
 
 									quality_check = list(fastqc = '~/libs/FastQC/fastqc',
 																			 rseqc = '~/libs/RSeQC-2.6.3/scripts'),
