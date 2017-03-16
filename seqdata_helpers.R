@@ -300,7 +300,7 @@ performMiXcrClonotypeAssembly = function(alignments, execute = TRUE) {
 	}
 }
 
-performMiXcrCloneExport = function(clones, chain, execute = TRUE) {
+performMiXcrCloneExport = function(clones, chain = NULL, execute = TRUE) {
 	command = paste(tool_paths$align$mixcr,
 									'exportClones',
 									if (is.character(chain)) {paste('-c', chain)},
