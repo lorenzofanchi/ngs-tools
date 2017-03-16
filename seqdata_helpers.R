@@ -230,7 +230,7 @@ performSTARAlignment = function(filename_one, filename_two = '', output_path, qu
   }
 }
 
-performMiXcrAlignment = function(filename_one, filename_two = NULL, species = 'hsa', mode = 'default', source = 'transcriptomic') {
+performMiXcrAlignment = function(filename_one, filename_two = NULL, species = 'hsa', mode = 'default', source = 'transcriptomic', execute = TRUE) {
 	command = paste(tool_paths$align$mixcr,
 									'align',
 									'--threads', tool_options$general$parallel_threads,
@@ -252,7 +252,7 @@ performMiXcrAlignment = function(filename_one, filename_two = NULL, species = 'h
 	}
 }
 
-performMiXcrContigAssembly = function(alignments) {
+performMiXcrContigAssembly = function(alignments, execute = TRUE) {
 	command = paste(tool_paths$align$mixcr,
 									'assemblePartial',
 									alignments,
@@ -268,7 +268,7 @@ performMiXcrContigAssembly = function(alignments) {
 	}
 }
 
-performMiXcrAlignmentExtension = function(rescued_alignments) {
+performMiXcrAlignmentExtension = function(rescued_alignments, execute = TRUE) {
 	command = paste(tool_paths$align$mixcr,
 									'extendAlignments',
 									rescued_alignments,
@@ -284,7 +284,7 @@ performMiXcrAlignmentExtension = function(rescued_alignments) {
 	}
 }
 
-performMiXcrClonotypeAssembly = function(alignments) {
+performMiXcrClonotypeAssembly = function(alignments, execute = TRUE) {
 	command = paste(tool_paths$align$mixcr,
 									'assemble',
 									alignments,
@@ -300,7 +300,7 @@ performMiXcrClonotypeAssembly = function(alignments) {
 	}
 }
 
-performMiXcrCloneExport = function(clones, chain) {
+performMiXcrCloneExport = function(clones, chain, execute = TRUE) {
 	command = paste(tool_paths$align$mixcr,
 									'exportClones',
 									if (is.character(chain)) {paste('-c', chain)},
