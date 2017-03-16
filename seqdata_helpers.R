@@ -306,9 +306,9 @@ performMiXcrCloneExport = function(clones, chain = NULL, execute = TRUE) {
 									if (is.character(chain)) {paste('-c', chain)},
 									clones,
 									if (is.character(chain)) {
-										paste0(gsub('\\.[^.]+$', '', clones), '_clones.', chain, '.txt')
+										paste0(gsub('\\.[^.]+$', '', clones), '_', chain, '.txt')
 									} else {
-										paste0(gsub('\\.[^.]+$', '', clones), '_clones.txt')
+										paste0(gsub('\\.[^.]+$', '', clones), '.txt')
 									}
 	)
 
