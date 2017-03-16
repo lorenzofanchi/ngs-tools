@@ -288,7 +288,7 @@ performMiXcrClonotypeAssembly = function(alignments, execute = TRUE) {
 	command = paste(tool_paths$align$mixcr,
 									'assemble',
 									alignments,
-									paste0(gsub('\\.[^.]+$', '', alignments), '_clones.vdjca')
+									paste0(gsub('\\.[^.]+$', '', alignments), '_clones.clns')
 	)
 
 	if (execute) {
