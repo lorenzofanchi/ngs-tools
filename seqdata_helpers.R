@@ -204,7 +204,7 @@ performTophat2Alignment = function(filename_one, filename_two, output_path, exec
 
 # align using star
 performSTARAlignment = function(filename_one, filename_two = '', output_path, quant_mode = 'salmon', execute = TRUE) {
-	dir.create(file.path(output_path, gsub('_L[0-9]{3}.+|_merged.+|\\.[^.]+', '', basename(filename_one))),
+	dir.create(file.path(output_path, gsub('_L[0-9]{3}.+|_merged.+|\\.[^.]+$', '', basename(filename_one))),
 						 showWarnings = F)
 
   command = paste(tool_paths$align$star,
@@ -214,7 +214,7 @@ performSTARAlignment = function(filename_one, filename_two = '', output_path, qu
   											 yes =  paste('--readFilesCommand', tool_options$star$read_files_command),
   											 no = ''),
   								"--readFilesIn", paste(filename_one, filename_two, sep = " "),
-  								"--outFileNamePrefix", file.path(output_path, gsub('_L[0-9]{3}.+|merged.+|\\.[^.]+', '', basename(filename_one)), gsub('L[0-9]{3}.+|merged.+|\\.[^.]+', '', basename(filename_one))),
+  								"--outFileNamePrefix", file.path(output_path, gsub('_L[0-9]{3}.+|merged.+|\\.[^.]+$', '', basename(filename_one)), gsub('L[0-9]{3}.+|merged.+|\\.[^.]+$', '', basename(filename_one))),
   								'--outSAMtype', tool_options$star$out_sam_type,
   								switch(EXPR = quant_mode,
   											 'none' = '',
