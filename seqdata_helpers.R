@@ -139,7 +139,9 @@ performFastQC = function(file, execute = TRUE) {
 
 # perform QC using FastQP
 performFastQP = function(file, execute = TRUE) {
-	command = paste(tool_paths$quality_check$fastqp,
+	command = paste('cd', dirname(file),';',
+									tool_paths$quality_check$fastqp,
+									'-o', gsub('\\..+$', '', basename(file)),
 									file)
 
 	if (execute) {
