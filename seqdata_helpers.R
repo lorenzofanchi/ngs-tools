@@ -35,7 +35,7 @@ tool_options = list(general = list(parallel_threads = 18),
 
 										star = list(index = '~/resources/ensembl_81/star_index',
 																read_files_command = 'zcat',
-																out_sam_type = 'BAM SortedByCoordinate',
+																out_sam_type = 'BAM SortedByCoordinate', # options are: 'None', 'SAM', 'BAM' | For latter two, with additional: 'Unsorted', 'SortedByCoordinate'
 																quant_mode = 'TranscriptomeSAM'),
 
 										tophat2 = list(library_type = 'fr-unstranded',
