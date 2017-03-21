@@ -7,6 +7,8 @@ source(file.path(data_path, 'ngs-tools', 'seqdata_helpers.R'))
 registerDoMC(16)
 
 fastq_files = list.files(path = file.path(data_path, '1b_rnaseq_data/fastq'),
+												 pattern = '\\.fastq$|\\.fastq\\.gz$',
+												 include.dirs = FALSE,
 												 full.names = TRUE)
 
 # perform quality checking
