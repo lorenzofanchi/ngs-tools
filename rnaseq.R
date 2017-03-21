@@ -2,6 +2,10 @@ data_path = '~/projects/## PROJECT ##'
 
 setwd(data_path)
 source('seqdata_helpers.R')
+# perform quality checking
+foreach(i = seq(1, length(fastq_files), 1)) %dopar% {
+	performFastQP(file = fastq_files[i])
+}
 
 registerDoMC(2)
 
