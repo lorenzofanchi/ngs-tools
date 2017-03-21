@@ -115,20 +115,26 @@ convertBamToFastqUsingBedtools = function(file, execute = TRUE) {
 
 # perform QC using FastQC
 performFastQC = function(file, execute = TRUE) {
-  command = paste(tool_paths$quality_check$fastqc,
-                  paste0("--outdir=", dirname(file)),
-                  file)
+	dir.create(file.path(dirname(file),
+											 gsub('\\..+$','', basename(file))), showWarnings = F)
 
-  if (grepl('\\.gz$', file)) {
-  	command = paste('zcat', file, '|', tool_paths$quality_check$fastqc, paste0("--outdir=", dirname(file)), 'stdin')
-  }
+	command = paste(tool_paths$quality_check$fastqc,
+									'-t', tool_options$general$parallel_threads,
+									paste0('--outdir=', file.path(dirname(file),
+																								gsub('\\..+$','', basename(file)))),
+									file)
 
-  if (execute) {
-  	system(command = command,
-  				 wait = TRUE)
-  } else {
-  	message(command)
-  }
+	if (grepl('\\.gz$', file)) {
+		command = paste('zcat', file, '|', tool_paths$quality_check$fastqc, paste0("--outdir=", file.path(dirname(file),
+																																																			gsub('\\..+$','', basename(file)))), 'stdin')
+	}
+
+	if (execute) {
+		system(command = command,
+					 wait = TRUE)
+	} else {
+		message(command)
+	}
 }
 
 # remove rRNA using SortMeRna
