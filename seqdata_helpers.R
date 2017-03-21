@@ -18,7 +18,7 @@ tool_paths = list(general = list(gffread = 'gffread',
 																			 rseqc = '~/libs/RSeQC-2.6.3/scripts'),
 
 									quantify = list(cufflinks = "~/libs/cufflinks-2.2.1-patched/cufflinks",
-																	salmon = '~/libs/Salmon-0.8.0_linux_x86_64/bin/salmon'),
+																	salmon = '~/libs/Salmon-0.8.2_linux_x86_64/bin/salmon'),
 
 									variant_calling = list(varscan2 = '~libs/varscan2-2.4.3/VarScan.v2.4.3.jar'))
 
