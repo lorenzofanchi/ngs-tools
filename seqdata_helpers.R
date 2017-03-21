@@ -137,8 +137,18 @@ performFastQC = function(file, execute = TRUE) {
 	}
 }
 
-# remove rRNA using SortMeRna
+# perform QC using FastQP
+performFastQP = function(file, execute = TRUE) {
+	command = paste(tool_paths$quality_check$fastqp,
+									file)
 
+	if (execute) {
+		system(command = command,
+					 wait = TRUE)
+	} else {
+		message(command)
+	}
+}
 
 # trim adapters & low Q seq using Trimmomatic
 performTrimmingUsingTrimmomatic = function(filename_one, filename_two, output_path, execute = TRUE) {
