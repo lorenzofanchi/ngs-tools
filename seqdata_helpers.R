@@ -226,21 +226,20 @@ performSTARAlignment = function(filename_one, filename_two = '', output_path, qu
 						 showWarnings = F)
 
   command = paste(tool_paths$align$star,
-                  "--runThreadN", tool_options$general$parallel_threads,
-                  "--genomeDir", tool_options$star$index,
-  								ifelse(test = grepl(pattern = '\\.gz$', x = filename_one),
-  											 yes =  paste('--readFilesCommand', tool_options$star$read_files_command),
-  											 no = ''),
-  								"--readFilesIn", paste(filename_one, filename_two, sep = " "),
-  								"--outFileNamePrefix", file.path(output_path, gsub('_L[0-9]{3}.+|merged.+|\\.[^.]+$', '', basename(filename_one)), gsub('L[0-9]{3}.+|merged.+|\\.[^.]+$', '', basename(filename_one))),
+                  '--runThreadN', tool_options$general$parallel_threads,
+                  '--genomeDir', tool_options$star$index,
+  								if (grepl(pattern = '\\.gz$', x = filename_one)) {paste('--readFilesCommand', tool_options$star$read_files_command)},
+  								'--readFilesIn', paste(filename_one, filename_two, sep = ' '),
+  								'--outFileNamePrefix', file.path(output_path, gsub('_L[0-9]{3}.+|merged.+|\\.[^.]+$', '', basename(filename_one)), gsub('L[0-9]{3}.+|merged.+|\\.[^.]+$', '', basename(filename_one))),
   								'--outSAMtype', tool_options$star$out_sam_type,
   								switch(EXPR = quant_mode,
   											 'none' = '',
-  											 'salmon' = paste('--quantMode', tool_options$star$quant_mode))
+  											 'salmon' = paste('--quantMode', tool_options$star$quant_mode)),
+  								if (!is.null(ram_limit)) {paste('--limitBAMsortRAM', ram_limit)}
   								)
 
   if (execute) {
-    system(command = paste("nice -n 19", command),
+    system(command = paste('nice -n 19', command),
            intern = FALSE,
            wait = TRUE)
   } else {
