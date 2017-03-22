@@ -12,7 +12,7 @@ tool_paths = list(general = list(gffread = 'gffread',
 									align = list(bowtie2 = '~/libs/bowtie2-2.2.8/bowtie2',
 															 mixcr = '~/libs/mixcr-2.1.1/mixcr',
 															 tophat2 = '~/libs/tophat-2.1.1.Linux_x86_64/tophat2',
-															 star = '~/libs/STAR-2.5.2b/bin/Linux_x86_64/STAR'),
+															 star = '~/libs/STAR-2.5.3a/bin/Linux_x86_64/STAR'),
 
 									quality_check = list(fastqc = '~/libs/FastQC/fastqc',
 																			 rseqc = '~/libs/RSeQC-2.6.3/scripts'),
