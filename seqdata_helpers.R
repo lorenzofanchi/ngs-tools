@@ -235,7 +235,7 @@ performSTARAlignment = function(filename_one, filename_two = '', output_path, qu
   								switch(EXPR = quant_mode,
   											 'none' = '',
   											 'salmon' = paste('--quantMode', tool_options$star$quant_mode)),
-  								if (!is.null(ram_limit)) {paste('--limitBAMsortRAM', ram_limit)}
+  								if (!is.null(ram_limit)) {paste('--limitBAMsortRAM', format(ram_limit, scientific = F))}
   								)
 
   if (execute) {
