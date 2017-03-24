@@ -221,7 +221,7 @@ performTophat2Alignment = function(filename_one, filename_two, output_path, exec
 }
 
 # align using star
-performSTARAlignment = function(filename_one, filename_two = '', output_path, quant_mode = 'salmon', ram_limit = NULL, execute = TRUE) {
+performSTARAlignment = function(filename_one, filename_two = '', output_path, quant_mode = 'salmon', ram_limit = NULL, additional_args = NULL, execute = TRUE) {
 	dir.create(file.path(output_path, gsub('_L[0-9]{3}.+|_merged.+|\\.[^.]+$', '', basename(filename_one))),
 						 showWarnings = F)
 
@@ -236,6 +236,7 @@ performSTARAlignment = function(filename_one, filename_two = '', output_path, qu
   											 'none' = '',
   											 'salmon' = paste('--quantMode', tool_options$star$quant_mode)),
   								if (!is.null(ram_limit)) {paste('--limitBAMsortRAM', format(ram_limit, scientific = F))}
+  								if (!is.null(additional_args)) {paste(additional_args)}
   								)
 
   if (execute) {
