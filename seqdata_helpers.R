@@ -497,7 +497,8 @@ mergeEnsgInfo = function(quant_file, enst_ensg_table_path = '', gtf_path = NULL,
 
 performGatkVariantAnnotation = function(vcf, snp_db, execute = FALSE) {
   command = paste('java -jar', tool_paths$variant_calling$gatk,
-                  '-T', 'VariantAnnotator',
+                  '--analysis_type', 'VariantAnnotator',
+                  '--reference_sequence', tool_options$salmon$fasta_dna,
                   '--variant', vcf,
                   '--dbsnp', snp_db,
                   '--out', file.path(dirname(vcf), paste0(gsub('[.][^.]+$', '', basename(vcf)), '_dbsnp.vcf'))
