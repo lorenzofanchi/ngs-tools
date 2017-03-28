@@ -34,16 +34,19 @@ tool_paths = list(general = list(gffread = 'gffread',
 									                       varscan2 = '~/libs/varscan2-2.4.3/VarScan.v2.4.3.jar')
 									)
 
-tool_options = list(general = list(parallel_threads = 18),
+tool_options = list(general = list(parallel_threads = 18,
+                                   
+                                   fasta_dna = '~/resources/ensembl_81/fasta_dna/Homo_sapiens.GRCh38.81.dna.primary_assembly.fa',
+                                   fasta_dna_dict = '~/resources/ensembl_81/fasta_dna/Homo_sapiens.GRCh38.81.dna.primary_assembly.dict',
+                                   gtf_annotation = '~/resources/ensembl_81/gtf/Homo_sapiens.GRCh38.81_no-contigs.gtf',
+                                   fasta_transcripts = '~/resources/ensembl_81/fasta_transcripts/Homo_sapiens.GRCh38.81.transcripts_no-contigs.fa',
+                                   
+                                   snp_db = '~/resources/dbsnp_b149/All_20161122.vcf.gz'),
 
 										cufflinks = list(gtf_annotation = '~/resources',
 																		 gtf_mask_annotation = '~/resources'),
 
 										rseqc = list(bed_reference = '~/resources/hg19_Ensembl.bed.gz'),
-
-										salmon = list(fasta_dna = '~/resources/ensembl_81/fasta_dna/Homo_sapiens.GRCh38.81.dna.primary_assembly.fa',
-																	gtf_annotation = '~/resources/ensembl_81/gtf/Homo_sapiens.GRCh38.81_no-contigs.gtf',
-																	fasta_transcripts = '~/resources/ensembl_81/fasta_transcripts/Homo_sapiens.GRCh38.81.transcripts_no-contigs.fa'),
 
 										star = list(index = '~/resources/ensembl_81/star_index',
 																read_files_command = 'zcat',
@@ -412,7 +415,7 @@ performSalmonQuantification = function(filename, output_path, execute = TRUE) {
 									'quant',
 									'-p', tool_options$general$parallel_threads,
 									'-l A',
-									'-t', tool_options$salmon$fasta_transcripts,
+									'-t', tool_options$general$fasta_transcripts,
 									'-a', filename,
 									'-o', file.path(output_path, gsub('_{0,1}Aligned.+', '', basename(filename))))
 
@@ -427,8 +430,8 @@ performSalmonQuantification = function(filename, output_path, execute = TRUE) {
 
 generateTranscriptomeFasta = function(execute = F) {
 	command = paste(tool_paths$general$gffread,
-									'-w', tool_options$salmon$fasta_transcripts,
-									'-g', tool_options$salmon$fasta_dna, tool_options$salmon$gtf_annotation)
+									'-w', tool_options$general$fasta_transcripts,
+									'-g', tool_options$general$fasta_dna, tool_options$general$gtf_annotation)
 
 	if (execute) {
 		system(command = command,
@@ -444,8 +447,8 @@ generateStarIndex = function(execute = F) {
 									'--runThreadN 32',
 									'--runMode genomeGenerate',
 									'--genomeDir', tool_options$star$index,
-									'--genomeFastaFiles', tool_options$salmon$fasta_dna,
-									'--sjdbGTFfile', tool_options$salmon$gtf_annotation)
+									'--genomeFastaFiles', tool_options$general$fasta_dna,
+									'--sjdbGTFfile', tool_options$general$gtf_annotation)
 
 	if (execute) {
 		system(command = command,
@@ -555,12 +558,12 @@ createFastaSequenceDictionary = function(fasta, execute = FALSE) {
   }
 }
 
-performGatkVariantAnnotation = function(vcf, snp_db, execute = FALSE) {
+performGatkVariantAnnotation = function(vcf, execute = FALSE) {
   command = paste('java -jar', tool_paths$variant_calling$gatk,
                   '--analysis_type', 'VariantAnnotator',
-                  '--reference_sequence', tool_options$salmon$fasta_dna,
+                  '--reference_sequence', tool_options$general$fasta_dna,
                   '--variant', vcf,
-                  '--dbsnp', snp_db,
+                  '--dbsnp', tool_options$general$snp_db,
                   '--out', file.path(dirname(vcf), paste0(gsub('[.][^.]+$', '', basename(vcf)), '-dbsnp.vcf'))
                   )
   
