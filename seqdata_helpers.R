@@ -7,7 +7,8 @@ suppressPackageStartupMessages(library(rtracklayer))
 tool_paths = list(general = list(gffread = 'gffread',
 																 samtools = '~/libs/samtools-1.3/bin/samtools',
 																 picard = '~/libs/picard-tools-2.9.0/picard.jar',
-																 trimmomatic = '~/libs/Trimmomatic-0.36/trimmomatic-0.36.jar'),
+																 trimmomatic = '~/libs/Trimmomatic-0.36/trimmomatic-0.36.jar',
+																 vcfsorter = '~/libs/vcfsorter/vcfsorter.pl'),
 
 									align = list(bowtie2 = '~/libs/bowtie2-2.2.8/bowtie2',
 															 mixcr = '~/libs/mixcr-2.1.1/mixcr',
@@ -509,6 +510,23 @@ sortVcf = function(vcf, seq_dict = NULL, execute = FALSE) {
            wait = TRUE)
   } else {
     message(paste("nohup nice -n 19", command, '&\n'))
+  }
+}
+
+sortVcfUsingVcfSorter = function(vcf, seq_dict, execute = TRUE) {
+  command = paste('perl ', tool_paths$general$vcfsorter,
+                  seq_dict,
+                  vcf,
+                  '>',
+                  file.path(dirname(vcf), paste0(gsub('[.][^.]+$', '', basename(vcf)), '-sorted.vcf'))
+  )
+  
+  if (execute) {
+    system(command = paste("nice -n 19", command),
+           intern = FALSE,
+           wait = TRUE)
+  } else {
+    message(paste("nice -n 19", command, '\n'))
   }
 }
 
