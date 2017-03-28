@@ -1,7 +1,16 @@
 ## functions for processing rnaseq data
-suppressPackageStartupMessages(library(doMC))
-suppressPackageStartupMessages(library(data.table))
-suppressPackageStartupMessages(library(rtracklayer))
+# install/load required packages
+if (!require('pacman')) install.packages('pacman')
+library(pacman)
+
+required_packages = c('data.table', 'doMC', 'rtracklayer', 'stringr')
+
+if (!p_isinstalled('rtracklayer')) {
+  source('https://bioconductor.org/biocLite.R')
+  biocLite('rtracklayer', suppressUpdates = T)
+}
+
+pacman::p_load(char = required_packages)
 
 # general parameters
 tool_paths = list(general = list(gffread = 'gffread',
