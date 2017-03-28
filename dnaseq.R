@@ -1,7 +1,9 @@
-data_path = '~/projects/## PROJECT ##'
+project_path = '~/projects/## PROJECT ##'
+data_path = file.path(project_path, 'neolution-prep')
 
 setwd(data_path)
-source('seqdata_helpers.R')
+source(file.path(data_path, 'ngs-tools', 'seqdata_helpers.R'))
+
 
 registerDoMC(2)
 
