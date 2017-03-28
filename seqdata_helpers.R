@@ -495,7 +495,7 @@ mergeEnsgInfo = function(quant_file, enst_ensg_table_path = '', gtf_path = NULL,
 
 # Annotation --------------------------------------------------------------
 
-performGatkVariantAnnotation = function(vcf, snp_db) {
+performGatkVariantAnnotation = function(vcf, snp_db, execute = FALSE) {
   command = paste('java -jar', tool_paths$variant_calling$gatk,
                   '-T', 'VariantAnnotator',
                   '--variant', vcf,
