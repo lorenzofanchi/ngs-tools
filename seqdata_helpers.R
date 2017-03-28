@@ -482,7 +482,7 @@ mergeEnsgInfo = function(quant_file, enst_ensg_table_path = '', gtf_path = NULL,
 		stop('Please supply enst_ensg_table_path & gtf_path to generate ENST-ENSG conversion table')
 	}
 
-	quant_data = setNames(object = pblapply(quant_file, fread, col.names = c('transcript_id', 'transcript_length_bp', 'effective_length', 'tpm', 'read_number')),
+	quant_data = setNames(object = mclapply(quant_file, fread, col.names = c('transcript_id', 'transcript_length_bp', 'effective_length', 'tpm', 'read_number'), mc.cores = 10),
 												nm = sapply(quant_file, function(path) unlist(strsplit(x = path, split = '/'))[length(unlist(strsplit(x = path, split = '/'))) - 1], USE.NAMES = F))
 
 	quant_data = pblapply(quant_data,
