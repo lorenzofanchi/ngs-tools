@@ -51,7 +51,7 @@ quant_files = list.files(path = file.path(data_path, '1b_rnaseq_data/processed_s
 												 pattern = '\\.sf')
 
 quant_data = mergeEnsgInfo(quant_file = quant_files,
-													 gtf_path = tool_options$salmon$gtf_annotation,
+													 gtf_path = tool_options$general$gtf_annotation,
 													 enst_ensg_table_path = '~/resources/ensembl_81/ensg-enst_table/Homo_sapiens.GRCh38.81.gtf_ensg-enst-table.tsv',
 													 aggregate_by_ensg = TRUE)
 
