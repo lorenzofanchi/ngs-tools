@@ -10,7 +10,7 @@ registerDoMC(2)
 
 # Variant calling ---------------------------------------------------------
 bam_files = list.files(path = file.path(data_path, '1c_dnaseq_data/bam'),
-											 pattern = '\\.bam')
+											 pattern = '\\.bam$')
 
 # perform variant calling
 
@@ -19,7 +19,7 @@ bam_files = list.files(path = file.path(data_path, '1c_dnaseq_data/bam'),
 
 # Variant annotation ------------------------------------------------------
 vcf_files = list.files(path = file.path(data_path, '1a_variants/vcf'),
-                       pattern = '-complete\\.vcf')
+                       pattern = '-complete\\.vcf$')
 
 # sort VCFs, if necessary
 createFastaSequenceDictionary(fasta = tool_options$salmon$fasta_dna)
@@ -30,6 +30,6 @@ invisible(sapply(vcf_files, function(file) sortVcfUsingVcfSorter(vcf = file,
 
 # annotate variants with dbSNP ids
 vcf_files = list.files(path = file.path(data_path, '1a_variants/vcf'),
-                       pattern = '-sorted\\.vcf')
+                       pattern = '-sorted\\.vcf$')
 
 invisible(sapply(vcf_files, function(file) performGatkVariantAnnotation(vcf = file)))

@@ -48,7 +48,7 @@ foreach(i = 1:length(bam_files)) %dopar% {
 quant_files = list.files(path = file.path(data_path, '1b_rnaseq_data/processed_salmon'),
 												 recursive = T,
 												 full.names = T,
-												 pattern = '\\.sf')
+												 pattern = '\\.sf$')
 
 quant_data = mergeEnsgInfo(quant_file = quant_files,
 													 gtf_path = tool_options$general$gtf_annotation,
