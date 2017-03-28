@@ -20,7 +20,9 @@ tool_paths = list(general = list(gffread = 'gffread',
 									quantify = list(cufflinks = "~/libs/cufflinks-2.2.1-patched/cufflinks",
 																	salmon = '~/libs/Salmon-0.8.2_linux_x86_64/bin/salmon'),
 
-									variant_calling = list(varscan2 = '~libs/varscan2-2.4.3/VarScan.v2.4.3.jar'))
+									variant_calling = list(gatk = '~/libs/GATK-3.7/GenomeAnalysisTK.jar',
+									                       varscan2 = '~/libs/varscan2-2.4.3/VarScan.v2.4.3.jar')
+									)
 
 tool_options = list(general = list(parallel_threads = 18),
 
@@ -488,4 +490,24 @@ mergeEnsgInfo = function(quant_file, enst_ensg_table_path = '', gtf_path = NULL,
 												})
 	}
 	return(quant_data)
+}
+
+
+# Annotation --------------------------------------------------------------
+
+performGatkVariantAnnotation = function(vcf, snp_db) {
+  command = paste('java -jar', tool_paths$variant_calling$gatk,
+                  '-T', 'VariantAnnotator',
+                  '--variant', vcf,
+                  '--dbsnp', snp_db,
+                  '--out', file.path(dirname(vcf), paste0(gsub('[.][^.]+$', '', basename(vcf)), '_dbsnp.vcf'))
+                  )
+  
+  if (execute) {
+    system(command = paste("nice -n 19", command),
+           intern = FALSE,
+           wait = TRUE)
+  } else {
+    message(paste("nice -n 19", command, '\n'))
+  }
 }
