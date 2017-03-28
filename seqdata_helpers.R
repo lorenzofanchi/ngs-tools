@@ -495,6 +495,22 @@ mergeEnsgInfo = function(quant_file, enst_ensg_table_path = '', gtf_path = NULL,
 
 # Annotation --------------------------------------------------------------
 
+createFastaSequenceDictionary = function(fasta, execute = FALSE) {
+  command = paste('java -jar', tool_paths$general$picard,
+                  'CreateSequenceDictionary',
+                  paste0('R=', fasta),
+                  paste0('O=', file.path(dirname(fasta), paste0(gsub('[.][^.]+$', '', basename(fasta)), '.dict')))
+  )
+  
+  if (execute) {
+    system(command = paste("nice -n 19", command),
+           intern = FALSE,
+           wait = TRUE)
+  } else {
+    message(paste("nohup nice -n 19", command, '&\n'))
+  }
+}
+
 performGatkVariantAnnotation = function(vcf, snp_db, execute = FALSE) {
   command = paste('java -jar', tool_paths$variant_calling$gatk,
                   '--analysis_type', 'VariantAnnotator',
