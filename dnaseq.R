@@ -19,7 +19,7 @@ bam_files = list.files(path = file.path(data_path, '1c_dnaseq_data/bam'),
 
 # Variant annotation ------------------------------------------------------
 vcf_files = list.files(path = file.path(data_path, '1a_variants/vcf'),
-                       pattern = '\\.vcf')
+                       pattern = '-complete\\.vcf')
 
 # sort VCFs, if necessary
 createFastaSequenceDictionary(fasta = tool_options$salmon$fasta_dna)
