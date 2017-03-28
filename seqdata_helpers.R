@@ -496,7 +496,7 @@ mergeEnsgInfo = function(quant_file, enst_ensg_table_path = '', gtf_path = NULL,
 
 # Annotation --------------------------------------------------------------
 
-sortVcf = function(vcf, seq_dict = NULL, execute = FALSE) {
+sortVcfUsingPicard = function(vcf, seq_dict = NULL, execute = FALSE) {
   command = paste('java -jar', tool_paths$general$picard,
                   'SortVcf',
                   paste0('INPUT=', vcf),
