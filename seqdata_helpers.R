@@ -495,6 +495,23 @@ mergeEnsgInfo = function(quant_file, enst_ensg_table_path = '', gtf_path = NULL,
 
 # Annotation --------------------------------------------------------------
 
+sortVcf = function(vcf, seq_dict = NULL, execute = FALSE) {
+  command = paste('java -jar', tool_paths$general$picard,
+                  'SortVcf',
+                  paste0('INPUT=', vcf),
+                  if (!is.null(seq_dict)) {paste0('SEQUENCE_DICTIONARY=', seq_dict)},
+                  paste0('OUTPUT=', file.path(dirname(vcf), paste0(gsub('[.][^.]+$', '', basename(vcf)), '-sorted.vcf')))
+  )
+  
+  if (execute) {
+    system(command = paste("nice -n 19", command),
+           intern = FALSE,
+           wait = TRUE)
+  } else {
+    message(paste("nohup nice -n 19", command, '&\n'))
+  }
+}
+
 createFastaSequenceDictionary = function(fasta, execute = FALSE) {
   command = paste('java -jar', tool_paths$general$picard,
                   'CreateSequenceDictionary',
@@ -517,7 +534,7 @@ performGatkVariantAnnotation = function(vcf, snp_db, execute = FALSE) {
                   '--reference_sequence', tool_options$salmon$fasta_dna,
                   '--variant', vcf,
                   '--dbsnp', snp_db,
-                  '--out', file.path(dirname(vcf), paste0(gsub('[.][^.]+$', '', basename(vcf)), '_dbsnp.vcf'))
+                  '--out', file.path(dirname(vcf), paste0(gsub('[.][^.]+$', '', basename(vcf)), '-dbsnp.vcf'))
                   )
   
   if (execute) {
