@@ -35,13 +35,13 @@ tool_paths = list(general = list(gffread = 'gffread',
 									)
 
 tool_options = list(general = list(parallel_threads = 18,
-                                   
-                                   fasta_dna = '~/resources/ensembl_81/fasta_dna/Homo_sapiens.GRCh38.81.dna.primary_assembly.fa',
-                                   fasta_dna_dict = '~/resources/ensembl_81/fasta_dna/Homo_sapiens.GRCh38.81.dna.primary_assembly.dict',
-                                   gtf_annotation = '~/resources/ensembl_81/gtf/Homo_sapiens.GRCh38.81_no-contigs.gtf',
-                                   fasta_transcripts = '~/resources/ensembl_81/fasta_transcripts/Homo_sapiens.GRCh38.81.transcripts_no-contigs.fa',
-                                   
-                                   snp_db = '~/resources/dbsnp_b149/All_20161122.vcf.gz'),
+
+																	 fasta_dna = '~/resources/ensembl_81/fasta_dna/Homo_sapiens.GRCh38.81.dna.primary_assembly.fa',
+																	 fasta_dna_dict = '~/resources/ensembl_81/fasta_dna/Homo_sapiens.GRCh38.81.dna.primary_assembly.dict',
+																	 gtf_annotation = '~/resources/ensembl_81/gtf/Homo_sapiens.GRCh38.81_no-contigs.gtf',
+																	 fasta_transcripts = '~/resources/ensembl_81/fasta_transcripts/Homo_sapiens.GRCh38.81.transcripts_no-contigs.fa',
+
+																	 snp_db = '~/resources/dbsnp_grch38/common_no_known_medical_impact.vcf.gz'),
 
 										cufflinks = list(gtf_annotation = '~/resources',
 																		 gtf_mask_annotation = '~/resources'),
