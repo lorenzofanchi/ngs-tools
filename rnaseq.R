@@ -46,8 +46,8 @@ foreach(i = 1:length(bam_files)) %dopar% {
 
 # merge ENSG identifiers to ENST in salmon output
 quant_files = list.files(path = file.path(data_path, '1b_rnaseq_data/processed_salmon'),
-												 recursive = T,
-												 full.names = T,
+												 recursive = TRUE,
+												 full.names = TRUE,
 												 pattern = '\\.sf$')
 
 quant_data = mergeEnsgInfo(quant_file = quant_files,
