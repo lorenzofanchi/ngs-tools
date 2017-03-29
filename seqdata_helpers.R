@@ -65,6 +65,7 @@ tool_options = list(general = list(parallel_threads = 18,
 
 # Convenience functions ---------------------------------------------------
 
+# wrapper for executing commands (or not)
 commandWrapper = function(command, nice = 19, wait = TRUE, execute) {
 	if (is.numeric(nice)) {command = paste('nice -n', nice, command)}
 
