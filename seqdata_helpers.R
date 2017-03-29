@@ -62,6 +62,23 @@ tool_options = list(general = list(parallel_threads = 18,
 																			 adaptor_sequences = '~/libs/Trimmomatic-0.36/adapters/Illumina_TruSeq_Adapters.fa'))
 
 
+
+# Convenience functions ---------------------------------------------------
+
+commandWrapper = function(command, nice = 19, wait = TRUE, execute) {
+	if (is.numeric(nice)) {command = paste('nice -n', nice, command)}
+
+	if (!execute) {command = paste('nohup', command, '2> nohup.out &\n')}
+
+	if (execute) {
+		system(command = command,
+					 intern = FALSE,
+					 wait = wait)
+	} else {
+		message(command)
+	}
+}
+
 # sort bam files by name using samtools
 sortBamByNameUsingSamtools = function(file, execute = TRUE) {
   command = paste(tool_paths$general$samtools,
