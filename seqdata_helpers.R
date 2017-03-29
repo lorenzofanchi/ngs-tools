@@ -79,24 +79,21 @@ commandWrapper = function(command, nice = 19, wait = TRUE, execute) {
 	}
 }
 
+# Format conversion -------------------------------------------------------
+
 # sort bam files by name using samtools
-sortBamByNameUsingSamtools = function(file, execute = TRUE) {
+sortBamByNameUsingSamtools = function(file, execute = FALSE) {
   command = paste(tool_paths$general$samtools,
                   'sort',
                   '-n',
                   file,
                   '-o', file.path(dirname(file), paste0(gsub('.bam', '', basename(file)), '-sorted.bam')))
 
-  if (execute) {
-    system(command = command,
-           wait = TRUE)
-  } else {
-    message(command)
-  }
+  commandWrapper(command = command, execute = execute)
 }
 
 # convert bam files to fastq using picard
-convertBamToFastqUsingPicard = function(file, execute = TRUE) {
+convertBamToFastqUsingPicard = function(file, execute = FALSE) {
 	command_samtools = paste(tool_paths$general$samtools,
 													 'view',
 													 '-h',
@@ -117,16 +114,11 @@ convertBamToFastqUsingPicard = function(file, execute = TRUE) {
 
 	command = paste(command_samtools, command_picard, sep = ' | ')
 
-  if (execute) {
-    system(command = command,
-           wait = TRUE)
-  } else {
-    message(command)
-  }
+	commandWrapper(command = command, execute = execute)
 }
 
 # convert bam files to fastq using bedtools
-convertBamToFastqUsingBedtools = function(file, execute = TRUE) {
+convertBamToFastqUsingBedtools = function(file, execute = FALSE) {
 	command = paste('bedtools',
 									'bamtofastq',
 									'-i', file,
@@ -134,19 +126,14 @@ convertBamToFastqUsingBedtools = function(file, execute = TRUE) {
 									'-fq2', file.path(dirname(file), paste0(gsub('.bam', '', basename(file)), '_2.fastq'))
 	)
 
-	if (execute) {
-		system(command = command,
-					 wait = TRUE)
-	} else {
-		message(command)
-	}
+	commandWrapper(command = command, execute = execute)
 }
 
 
 # Quality control ---------------------------------------------------------
 
 # perform QC using FastQC
-performFastQC = function(file, execute = TRUE) {
+performFastQC = function(file, execute = FALSE) {
 	dir.create(file.path(dirname(file),
 											 gsub('\\..+$','', basename(file))), showWarnings = F)
 
@@ -161,31 +148,21 @@ performFastQC = function(file, execute = TRUE) {
 																																																			gsub('\\..+$','', basename(file)))), 'stdin')
 	}
 
-	if (execute) {
-		system(command = command,
-					 wait = TRUE)
-	} else {
-		message(command)
-	}
+	commandWrapper(command = command, execute = execute)
 }
 
 # perform QC using FastQP
-performFastQP = function(file, execute = TRUE) {
+performFastQP = function(file, execute = FALSE) {
 	command = paste('cd', dirname(file),';',
 									tool_paths$quality_check$fastqp,
 									'-o', gsub('\\..+$', '', basename(file)),
 									file)
 
-	if (execute) {
-		system(command = command,
-					 wait = TRUE)
-	} else {
-		message(command)
-	}
+	commandWrapper(command = command, execute = execute)
 }
 
 # trim adapters & low Q seq using Trimmomatic
-performTrimmingUsingTrimmomatic = function(filename_one, filename_two, output_path, execute = TRUE) {
+performTrimmingUsingTrimmomatic = function(filename_one, filename_two, output_path, execute = FALSE) {
   command = paste('java',
                   '-jar', tool_paths$general$trimmomatic,
                   'PE',
@@ -201,36 +178,24 @@ performTrimmingUsingTrimmomatic = function(filename_one, filename_two, output_pa
                   'MINLEN:16'
                   )
 
-  if (execute) {
-    system(command = paste("nice -n 19", command),
-           intern = TRUE,
-           wait = TRUE)
-  } else {
-    message(paste("nice -n 19", command))
-  }
+  commandWrapper(command = command, execute = execute)
 }
 
 # infer strandedness using RSeQC
-inferStrandednessUsingRSeQC = function(bam_file, execute = TRUE) {
+inferStrandednessUsingRSeQC = function(bam_file, execute = FALSE) {
 	command = paste('python',
 									file.path(tool_paths$quality_check$rseqc, 'infer_experiment.py'),
 									'-i', bam_file,
 									'-r', tool_options$rseqc$bed_reference)
 
-	if (execute) {
-		system(command = paste("nice -n 19", command),
-					 intern = TRUE,
-					 wait = TRUE)
-	} else {
-		message(paste("nice -n 19", command))
-	}
+	commandWrapper(command = command, execute = execute)
 }
 
 
 # Read alignment ----------------------------------------------------------
 
 # align using tophat2
-performTophat2Alignment = function(filename_one, filename_two, output_path, execute = TRUE) {
+performTophat2Alignment = function(filename_one, filename_two, output_path, execute = FALSE) {
   command = paste(tool_paths$align$tophat2,
                   '-p', tool_options$general$parallel_threads,
                   '-m', '1',
@@ -243,17 +208,11 @@ performTophat2Alignment = function(filename_one, filename_two, output_path, exec
   								tool_options$tophat2$bowtie2_index,
                   paste(filename_one, filename_two, sep = ','))
 
-  if (execute) {
-    system(command = paste("nice -n 19", command),
-           intern = TRUE,
-           wait = TRUE)
-  } else {
-    message(paste("nice -n 19", command))
-  }
+  commandWrapper(command = command, execute = execute)
 }
 
 # align using star
-performSTARAlignment = function(filename_one, filename_two = '', output_path, quant_mode = 'salmon', ram_limit = NULL, additional_args = NULL, execute = TRUE) {
+performSTARAlignment = function(filename_one, filename_two = '', output_path, quant_mode = 'salmon', ram_limit = NULL, additional_args = NULL, execute = FALSE) {
 	dir.create(file.path(output_path, gsub('_L[0-9]{3}.+|_merged.+|\\.[^.]+$', '', basename(filename_one))),
 						 showWarnings = F)
 
@@ -271,16 +230,10 @@ performSTARAlignment = function(filename_one, filename_two = '', output_path, qu
   								if (!is.null(additional_args)) {paste(additional_args)}
   								)
 
-  if (execute) {
-    system(command = paste('nice -n 19', command),
-           intern = FALSE,
-           wait = TRUE)
-  } else {
-    message(paste("nice -n 19", command, '\n'))
-  }
+  commandWrapper(command = command, execute = execute)
 }
 
-performMiXcrAlignment = function(filename_one, filename_two = NULL, species = 'hsa', mode = 'default', source = 'transcriptomic', execute = TRUE) {
+performMiXcrAlignment = function(filename_one, filename_two = NULL, species = 'hsa', mode = 'default', source = 'transcriptomic', execute = FALSE) {
 	command = paste(tool_paths$align$mixcr,
 									'align',
 									'--threads', tool_options$general$parallel_threads,
@@ -293,64 +246,40 @@ performMiXcrAlignment = function(filename_one, filename_two = NULL, species = 'h
 									paste0(gsub('[LS][0-9]{2,3}.+', '', filename_one), 'alignments.vdjca')
 	)
 
-	if (execute) {
-		system(command = paste("nice -n 19", command),
-					 intern = FALSE,
-					 wait = TRUE)
-	} else {
-		message(paste("nice -n 19", command, '\n'))
-	}
+	commandWrapper(command = command, execute = execute)
 }
 
-performMiXcrContigAssembly = function(alignments, execute = TRUE) {
+performMiXcrContigAssembly = function(alignments, execute = FALSE) {
 	command = paste(tool_paths$align$mixcr,
 									'assemblePartial',
 									alignments,
 									paste0(gsub('\\.[^.]+$', '', alignments), '_rescued.vdjca')
 	)
 
-	if (execute) {
-		system(command = paste("nice -n 19", command),
-					 intern = FALSE,
-					 wait = TRUE)
-	} else {
-		message(paste("nice -n 19", command, '\n'))
-	}
+	commandWrapper(command = command, execute = execute)
 }
 
-performMiXcrAlignmentExtension = function(rescued_alignments, execute = TRUE) {
+performMiXcrAlignmentExtension = function(rescued_alignments, execute = FALSE) {
 	command = paste(tool_paths$align$mixcr,
 									'extendAlignments',
 									rescued_alignments,
 									paste0(gsub('\\.[^.]+$', '', rescued_alignments), '_extended.vdjca')
 	)
 
-	if (execute) {
-		system(command = paste("nice -n 19", command),
-					 intern = FALSE,
-					 wait = TRUE)
-	} else {
-		message(paste("nice -n 19", command, '\n'))
-	}
+	commandWrapper(command = command, execute = execute)
 }
 
-performMiXcrClonotypeAssembly = function(alignments, execute = TRUE) {
+performMiXcrClonotypeAssembly = function(alignments, execute = FALSE) {
 	command = paste(tool_paths$align$mixcr,
 									'assemble',
 									alignments,
 									paste0(gsub('\\.[^.]+$', '', alignments), '_clones.clns')
 	)
 
-	if (execute) {
-		system(command = paste("nice -n 19", command),
-					 intern = FALSE,
-					 wait = TRUE)
-	} else {
-		message(paste("nice -n 19", command, '\n'))
-	}
+	commandWrapper(command = command, execute = execute)
 }
 
-performMiXcrCloneExport = function(clones, chain = NULL, execute = TRUE) {
+performMiXcrCloneExport = function(clones, chain = NULL, execute = FALSE) {
 	command = paste(tool_paths$align$mixcr,
 									'exportClones',
 									if (is.character(chain)) {paste('-c', chain)},
@@ -362,18 +291,12 @@ performMiXcrCloneExport = function(clones, chain = NULL, execute = TRUE) {
 									}
 	)
 
-	if (execute) {
-		system(command = paste("nice -n 19", command),
-					 intern = FALSE,
-					 wait = TRUE)
-	} else {
-		message(paste("nice -n 19", command, '\n'))
-	}
+	commandWrapper(command = command, execute = execute)
 }
 
 # Variant calling ---------------------------------------------------------
 
-callGermlineAndSomaticVariants = function(normal_bam, tumor_bam, ref_genome) {
+callGermlineAndSomaticVariants = function(normal_bam, tumor_bam, ref_genome, execute = FALSE) {
 	if (any(!sapply(c(normal_bam, tumor_bam, ref_genome), file.exists))) {
 		stop('Please check bam file and/or ref genome paths')
 	}
@@ -392,19 +315,13 @@ callGermlineAndSomaticVariants = function(normal_bam, tumor_bam, ref_genome) {
 	command = paste('java -jar', tool_paths$variant_calling$varscan2, 'somatic',
 									'<(', normal_pileup,')', '<(', tumor_pileup, ')', basename(tumor_bam))
 
-	if (execute) {
-		system(command = paste("nice -n 19", command),
-					 intern = FALSE,
-					 wait = TRUE)
-	} else {
-		message(paste("nice -n 19", command, '\n'))
-	}
+	commandWrapper(command = command, execute = execute)
 }
 
 # RNA quantification ------------------------------------------------------
 
 # quantify using cufflinks
-performCufflinksQuantification = function(filename, output_path, execute = TRUE) {
+performCufflinksQuantification = function(filename, output_path, execute = FALSE) {
   command = paste(tool_paths$quantify$cufflinks,
                   "-p", tool_options$general$parallel_threads,
                   "-q",
@@ -414,17 +331,11 @@ performCufflinksQuantification = function(filename, output_path, execute = TRUE)
                   "-o", output_path,
                   filename)
 
-  if (execute) {
-    system(command = paste("nice -n 19", command),
-           intern = FALSE,
-           wait = TRUE)
-  } else {
-    message(paste("nice -n 19", command, '\n'))
-  }
+  commandWrapper(command = command, execute = execute)
 }
 
 # quantify using salmon
-performSalmonQuantification = function(filename, output_path, execute = TRUE) {
+performSalmonQuantification = function(filename, output_path, execute = FALSE) {
 	dir.create(file.path(output_path, gsub('_{0,1}Aligned.+', '', basename(filename))),
 						 showWarnings = F)
 
@@ -436,30 +347,18 @@ performSalmonQuantification = function(filename, output_path, execute = TRUE) {
 									'-a', filename,
 									'-o', file.path(output_path, gsub('_{0,1}Aligned.+', '', basename(filename))))
 
-	if (execute) {
-		system(command = paste("nice -n 19", command),
-					 intern = FALSE,
-					 wait = TRUE)
-	} else {
-		message(paste("nice -n 19", command, '\n'))
-	}
+	commandWrapper(command = command, execute = execute)
 }
 
-generateTranscriptomeFasta = function(execute = F) {
+generateTranscriptomeFasta = function(execute = FALSE) {
 	command = paste(tool_paths$general$gffread,
 									'-w', tool_options$general$fasta_transcripts,
 									'-g', tool_options$general$fasta_dna, tool_options$general$gtf_annotation)
 
-	if (execute) {
-		system(command = command,
-					 intern = F,
-					 wait = T)
-	} else {
-		message(paste("nice -n 19", command, '\n'))
-	}
+	commandWrapper(command = command, execute = execute)
 }
 
-generateStarIndex = function(execute = F) {
+generateStarIndex = function(execute = FALSE) {
 	command = paste(tool_paths$align$star,
 									'--runThreadN 32',
 									'--runMode genomeGenerate',
@@ -467,13 +366,7 @@ generateStarIndex = function(execute = F) {
 									'--genomeFastaFiles', tool_options$general$fasta_dna,
 									'--sjdbGTFfile', tool_options$general$gtf_annotation)
 
-	if (execute) {
-		system(command = command,
-					 intern = F,
-					 wait = T)
-	} else {
-		message(paste("nice -n 19", command, '\n'))
-	}
+	commandWrapper(command = command, execute = execute)
 }
 
 # merge ensg info to salmon output
@@ -512,7 +405,7 @@ mergeEnsgInfo = function(quant_file, enst_ensg_table_path = '', gtf_path = NULL,
 	                                    neworder = c('gene_id', 'transcript_id', 'transcript_length_bp', 'effective_length', 'tpm', 'read_number'))
 	                        return(data)
 	                      })
-	
+
 	if (aggregate_by_ensg) {
 	  quant_data = pblapply(quant_data,
 	                        function(dt) {
@@ -532,14 +425,8 @@ sortVcfUsingPicard = function(vcf, seq_dict = NULL, execute = FALSE) {
                   if (!is.null(seq_dict)) {paste0('SEQUENCE_DICTIONARY=', seq_dict)},
                   paste0('OUTPUT=', file.path(dirname(vcf), paste0(gsub('[.][^.]+$', '', basename(vcf)), '-sorted.vcf')))
   )
-  
-  if (execute) {
-    system(command = paste("nice -n 19", command),
-           intern = FALSE,
-           wait = TRUE)
-  } else {
-    message(paste("nohup nice -n 19", command, '&\n'))
-  }
+
+  commandWrapper(command = command, execute = execute)
 }
 
 sortVcfUsingVcfSorter = function(vcf, seq_dict, execute = TRUE) {
@@ -549,14 +436,8 @@ sortVcfUsingVcfSorter = function(vcf, seq_dict, execute = TRUE) {
                   '>',
                   file.path(dirname(vcf), paste0(gsub('[.][^.]+$', '', basename(vcf)), '-sorted.vcf'))
   )
-  
-  if (execute) {
-    system(command = paste("nice -n 19", command),
-           intern = FALSE,
-           wait = TRUE)
-  } else {
-    message(paste("nice -n 19", command, '\n'))
-  }
+
+  commandWrapper(command = command, execute = execute)
 }
 
 createFastaSequenceDictionary = function(fasta, execute = FALSE) {
@@ -565,14 +446,8 @@ createFastaSequenceDictionary = function(fasta, execute = FALSE) {
                   paste0('R=', fasta),
                   paste0('O=', file.path(dirname(fasta), paste0(gsub('[.][^.]+$', '', basename(fasta)), '.dict')))
   )
-  
-  if (execute) {
-    system(command = paste("nice -n 19", command),
-           intern = FALSE,
-           wait = TRUE)
-  } else {
-    message(paste("nohup nice -n 19", command, '&\n'))
-  }
+
+  commandWrapper(command = command, execute = execute)
 }
 
 performGatkVariantAnnotation = function(vcf, execute = FALSE) {
@@ -583,12 +458,6 @@ performGatkVariantAnnotation = function(vcf, execute = FALSE) {
                   '--dbsnp', tool_options$general$snp_db,
                   '--out', file.path(dirname(vcf), paste0(gsub('[.][^.]+$', '', basename(vcf)), '-dbsnp.vcf'))
                   )
-  
-  if (execute) {
-    system(command = paste("nice -n 19", command),
-           intern = FALSE,
-           wait = TRUE)
-  } else {
-    message(paste("nice -n 19", command, '\n'))
-  }
+
+  commandWrapper(command = command, execute = execute)
 }
