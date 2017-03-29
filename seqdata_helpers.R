@@ -41,7 +41,8 @@ tool_options = list(general = list(parallel_threads = 18,
 																	 gtf_annotation = '~/resources/ensembl_81/gtf/Homo_sapiens.GRCh38.81_no-contigs.gtf',
 																	 fasta_transcripts = '~/resources/ensembl_81/fasta_transcripts/Homo_sapiens.GRCh38.81.transcripts_no-contigs.fa',
 
-																	 snp_db = '~/resources/dbsnp_grch38/common_no_known_medical_impact.vcf.gz'),
+																	 snp_db = '~/resources/dbsnp_grch38/All_20161122.vcf.gz',
+																	 cosmic_db = '~/resources/cosmic_80/CosmicCodingMuts.vcf.gz'),
 
 										cufflinks = list(gtf_annotation = '~/resources',
 																		 gtf_mask_annotation = '~/resources'),
@@ -451,13 +452,14 @@ createFastaSequenceDictionary = function(fasta, execute = FALSE) {
   commandWrapper(command = command, execute = execute)
 }
 
-performGatkVariantAnnotation = function(vcf, execute = FALSE) {
+performGatkVariantAnnotation = function(vcf, annotation_db = 'dbsnp', execute = FALSE) {
   command = paste('java -jar', tool_paths$variant_calling$gatk,
                   '--analysis_type', 'VariantAnnotator',
                   '--reference_sequence', tool_options$general$fasta_dna,
                   '--variant', vcf,
-                  '--dbsnp', tool_options$general$snp_db,
-                  '--out', file.path(dirname(vcf), paste0(gsub('[.][^.]+$', '', basename(vcf)), '-dbsnp.vcf'))
+                  '--dbsnp', if (annotation_db == 'dbsnp') {tool_options$general$snp_db} else if (annotation_db == 'cosmic') {tool_options$general$cosmic_db},
+                  '--out', file.path(dirname(vcf), paste0(gsub('[.][^.]+$', '', basename(vcf)),
+                  																				if (annotation_db == 'dbsnp') {'-dbsnp.vcf'} else if (annotation_db == 'cosmic') {'-cosmic.vcf'}))
                   )
 
   commandWrapper(command = command, execute = execute)
