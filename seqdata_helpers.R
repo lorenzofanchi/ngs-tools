@@ -14,7 +14,7 @@ pacman::p_load(char = required_packages)
 
 # general parameters
 tool_paths = list(general = list(gffread = 'gffread',
-																 samtools = '~/libs/samtools-1.3/bin/samtools',
+																 samtools = '~/libs/samtools-1.4/bin/samtools',
 																 picard = '~/libs/picard-tools-2.9.0/picard.jar',
 																 trimmomatic = '~/libs/Trimmomatic-0.36/trimmomatic-0.36.jar',
 																 vcfsorter = '~/libs/vcfsorter/vcfsorter.pl'),
@@ -36,10 +36,10 @@ tool_paths = list(general = list(gffread = 'gffread',
 
 tool_options = list(general = list(parallel_threads = 18,
 
-																	 fasta_dna = '~/resources/ensembl_81/fasta_dna/Homo_sapiens.GRCh38.81.dna.primary_assembly.fa',
-																	 fasta_dna_dict = '~/resources/ensembl_81/fasta_dna/Homo_sapiens.GRCh38.81.dna.primary_assembly.dict',
-																	 gtf_annotation = '~/resources/ensembl_81/gtf/Homo_sapiens.GRCh38.81_no-contigs.gtf',
-																	 fasta_transcripts = '~/resources/ensembl_81/fasta_transcripts/Homo_sapiens.GRCh38.81.transcripts_no-contigs.fa',
+																	 fasta_dna = '~/resources/ensembl_88/fasta_dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa',
+																	 fasta_dna_dict = '~/resources/ensembl_88/fasta_dna/Homo_sapiens.GRCh38.dna.primary_assembly.dict',
+																	 gtf_annotation = '~/resources/ensembl_88/gtf/Homo_sapiens.GRCh38.88.gtf',
+																	 fasta_transcripts = '~/resources/ensembl_88/fasta_transcripts/Homo_sapiens.GRCh38.88.transcripts.fa',
 
 																	 snp_db = '~/resources/dbsnp_grch38/All_20161122.vcf.gz',
 																	 cosmic_db = '~/resources/cosmic_80/CosmicCodingMuts.vcf.gz'),
@@ -49,7 +49,7 @@ tool_options = list(general = list(parallel_threads = 18,
 
 										rseqc = list(bed_reference = '~/resources/hg19_Ensembl.bed.gz'),
 
-										star = list(index = '~/resources/ensembl_81/star_index',
+										star = list(index = '~/resources/ensembl_88/star_index',
 																read_files_command = 'zcat',
 																out_sam_type = 'BAM SortedByCoordinate', # options are: 'None', 'SAM', 'BAM' | For latter two, with additional: 'Unsorted', 'SortedByCoordinate'
 																quant_mode = 'TranscriptomeSAM'),

@@ -24,7 +24,7 @@ vcf_files = list.files(path = file.path(data_path, '1a_variants/vcf'),
 											 full.names = TRUE)
 
 # sort VCFs, if necessary
-createFastaSequenceDictionary(fasta = tool_options$salmon$fasta_dna)
+createFastaSequenceDictionary(fasta = tool_options$general$fasta_dna)
 
 invisible(sapply(vcf_files, function(file) sortVcfUsingVcfSorter(vcf = file,
                                                                  seq_dict = tool_options$general$fasta_dna_dict,
