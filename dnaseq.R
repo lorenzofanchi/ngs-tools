@@ -9,19 +9,28 @@ registerDoMC(2)
 
 
 # Variant calling ---------------------------------------------------------
+# base quality recalibration
 bam_files = list.files(path = file.path(data_path, '1c_dnaseq_data/bam'),
 											 pattern = '\\.bam$',
 											 full.names = TRUE)
 
-# base quality recalibration
-performBaseQualityRecalibrationUsingGatk(bam = ,
-																				 bed_regions = )
+invisible(sapply(bam_files,
+								 function(file) performBaseQualityRecalibrationUsingGatk(bam = file,
+								 																												bed_regions = )))
 
 # perform variant calling
-callSomaticVariantsUsingGatkMutect2(normal_bam = ,
-																		tumor_bam = )
+bam_files = list.files(path = file.path(data_path, '1c_dnaseq_data/bam'),
+											 pattern = '\\-bq.bam$',
+											 full.names = TRUE)
 
-callGermlineVariantsUsingGatkHaplotypeCaller(normal_bam = )
+invisible(mapply(function(normal, tumor) callSomaticVariantsUsingGatkMutect2(normal_bam = ,
+								 																									 tumor_bam = ,
+								 																									 bed_regions = ),
+								 bam_files[seq(1, length(bam_files), 2)],
+								 bam_files[seq(2, length(bam_files), 2)])) ## check that this works out for you paired samples!
+
+callGermlineVariantsUsingGatkHaplotypeCaller(normal_bam = ,
+																						 bed_regions = )
 
 
 # Variant annotation ------------------------------------------------------
