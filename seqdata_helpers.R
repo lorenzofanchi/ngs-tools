@@ -337,7 +337,7 @@ callSomaticVariantsUsingGatkMutect2 = function(normal_bam, tumor_bam, ref_genome
 									'-U', 'ALLOW_SEQ_DICT_INCOMPATIBILITY',
 									'-o', file.path(dirname(gsub('\\/bam\\/', '\\/vcf\\/', tumor_bam)),
 																	basename(gsub('\\.bam$', '\\.vcf', tumor_bam))),
-									'--dpsnp', db_snp,
+									'--dbsnp', db_snp,
 									'--cosmic', cosmic_db,
 									'--tumor_lod', 8,
 									'--max_alt_alleles_in_normal_count', 10,
