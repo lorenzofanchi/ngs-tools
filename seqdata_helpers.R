@@ -299,6 +299,32 @@ performMiXcrCloneExport = function(clones, chain = NULL, execute = FALSE) {
 # Variant calling ---------------------------------------------------------
 
 callGermlineVariantsUsingGatkHaplotypeCaller = function(normal_bam, ref_genome = tool_options$general$fasta_dna, db_snp = tool_options$general$snp_db, execute = FALSE) {
+performBaseQualityRecalibrationUsingGatk = function(bam,
+																										ref_genome = tool_options$general$fasta_dna,
+																										bed_regions = NULL,
+																										db_snp = tool_options$general$snp_db,
+																										execute = FALSE) {
+	# perform base quality recalibration
+	command_bq = paste('java -Xmx4g -jar', tool_paths$variant_calling$gatk,
+										 '-T', 'BaseRecalibrator',
+										 '-R', ref_genome,
+										 '-I', normal_bam,
+										 '-knownSites', db_snp,
+										 '-o', gsub('\\.bam$', '_recal_data.table', bam))
+
+	# Prints all reads that have a mapping quality above zero
+	command_pr = paste('java -Xmx4g -jar', tool_paths$variant_calling$gatk,
+										 '-T', 'PrintReads',
+										 '-R', ref_genome,
+										 '-I', bam,
+										 '-o', gsub('\\.bam$', '-bq.bam', bam),
+										 '--read_filter', 'MappingQualityZero',
+										 '--BQSR', gsub('\\.bam', '_recal_data.table', bam))
+
+	command = paste(command_bq, command_pr, sep = ' && ')
+
+	commandWrapper(command = command, execute = execute)
+}
 	if (any(!sapply(c(normal_bam, ref_genome, db_snp), file.exists))) {
 		stop('Please check bam file and/or ref_genome/dbsnp/cosmic paths')
 	}
