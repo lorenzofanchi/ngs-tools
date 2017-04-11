@@ -307,7 +307,7 @@ performBaseQualityRecalibrationUsingGatk = function(bam,
 	command_bq = paste('java -Xmx4g -jar', tool_paths$variant_calling$gatk,
 										 '-T', 'BaseRecalibrator',
 										 '-R', ref_genome,
-										 '-I', normal_bam,
+										 '-I', bam,
 										 '-knownSites', db_snp,
 										 '-o', gsub('\\.bam$', '_recal_data.table', bam))
 
