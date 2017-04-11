@@ -298,7 +298,6 @@ performMiXcrCloneExport = function(clones, chain = NULL, execute = FALSE) {
 
 # Variant calling ---------------------------------------------------------
 
-callGermlineVariantsUsingGatkHaplotypeCaller = function(normal_bam, ref_genome = tool_options$general$fasta_dna, db_snp = tool_options$general$snp_db, execute = FALSE) {
 performBaseQualityRecalibrationUsingGatk = function(bam,
 																										ref_genome = tool_options$general$fasta_dna,
 																										bed_regions = NULL,
@@ -325,6 +324,12 @@ performBaseQualityRecalibrationUsingGatk = function(bam,
 
 	commandWrapper(command = command, execute = execute)
 }
+
+callGermlineVariantsUsingGatkHaplotypeCaller = function(normal_bam,
+																												ref_genome = tool_options$general$fasta_dna,
+																												bed_regions = NULL,
+																												db_snp = tool_options$general$snp_db,
+																												execute = FALSE) {
 	if (any(!sapply(c(normal_bam, ref_genome, db_snp), file.exists))) {
 		stop('Please check bam file and/or ref_genome/dbsnp/cosmic paths')
 	}
@@ -332,10 +337,11 @@ performBaseQualityRecalibrationUsingGatk = function(bam,
 	dir.create(file.path(dirname(gsub('\\/bam\\/', '\\/vcf\\/',normal_bam))),
 						 showWarnings = F)
 
-	command = paste('java -Xmx4g -jar', tool_paths$variant_calling$gatk,
+	command = paste('java -Xmx8g -jar', tool_paths$variant_calling$gatk,
 									'-T', 'HaplotypeCaller',
 									'-R', ref_genome,
 									'-I', normal_bam,
+									if (!is.null(bed_regions)) { paste('-L', bed_regions) },
 									'-o', file.path(dirname(gsub('\\/bam\\/', '\\/vcf\\/', normal_bam)),
 																	basename(gsub('\\.bam$', '\\.vcf', normal_bam))),
 									'--dbsnp', db_snp,
@@ -346,7 +352,13 @@ performBaseQualityRecalibrationUsingGatk = function(bam,
 	commandWrapper(command = command, execute = execute)
 }
 
-callSomaticVariantsUsingGatkMutect2 = function(normal_bam, tumor_bam, ref_genome = tool_options$general$fasta_dna, db_snp = tool_options$general$snp_db, cosmic_db = tool_options$general$cosmic_db, execute = FALSE) {
+callSomaticVariantsUsingGatkMutect2 = function(normal_bam,
+																							 tumor_bam,
+																							 ref_genome = tool_options$general$fasta_dna,
+																							 bed_regions = NULL,
+																							 db_snp = tool_options$general$snp_db,
+																							 cosmic_db = tool_options$general$cosmic_db,
+																							 execute = FALSE) {
 	if (any(!sapply(c(normal_bam, tumor_bam, ref_genome, db_snp, cosmic_db), file.exists))) {
 		stop('Please check bam file and/or ref_genome/dbsnp/cosmic paths')
 	}
@@ -354,11 +366,12 @@ callSomaticVariantsUsingGatkMutect2 = function(normal_bam, tumor_bam, ref_genome
 	dir.create(file.path(dirname(gsub('\\/bam\\/', '\\/vcf\\/', tumor_bam))),
 						 showWarnings = F)
 
-	command = paste('java -Xmx4g -jar', tool_paths$variant_calling$gatk,
+	command = paste('java -Xmx8g -jar', tool_paths$variant_calling$gatk,
 									'-T', 'MuTect2',
 									'-R', ref_genome,
 									'-I:tumor', tumor_bam,
 									'-I:normal', normal_bam,
+									if (!is.null(bed_regions)) { paste('-L', bed_regions) },
 									'-U', 'ALLOW_SEQ_DICT_INCOMPATIBILITY',
 									'-o', file.path(dirname(gsub('\\/bam\\/', '\\/vcf\\/', tumor_bam)),
 																	basename(gsub('\\.bam$', '\\.vcf', tumor_bam))),
