@@ -13,6 +13,10 @@ bam_files = list.files(path = file.path(data_path, '1c_dnaseq_data/bam'),
 											 pattern = '\\.bam$',
 											 full.names = TRUE)
 
+# base quality recalibration
+performBaseQualityRecalibrationUsingGatk(bam = ,
+																				 bed_regions = )
+
 # perform variant calling
 callSomaticVariantsUsingGatkMutect2(normal_bam = ,
 																		tumor_bam = )
