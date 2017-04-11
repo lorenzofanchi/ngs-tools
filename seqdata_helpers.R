@@ -320,11 +320,9 @@ performBaseQualityRecalibrationUsingGatk = function(bam,
 										 '--read_filter', 'MappingQualityZero',
 										 '--BQSR', gsub('\\.bam', '_recal_data.table', bam))
 
-	commandWrapper(command = command_bq,
-								 execute = execute)
-	if (!execute) { message(' && ') }
-	commandWrapper(command = command_pr,
-								 execute = execute)
+	command = paste(command_bq, command_pr, sep = ' && ')
+
+	commandWrapper(command = command, execute = execute)
 }
 
 callGermlineVariantsUsingGatkHaplotypeCaller = function(normal_bam,
