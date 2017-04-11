@@ -303,11 +303,15 @@ callGermlineVariantsUsingGatkHaplotypeCaller = function(normal_bam, ref_genome =
 		stop('Please check bam file and/or ref_genome/dbsnp/cosmic paths')
 	}
 
+	dir.create(file.path(dirname(gsub('\\/bam\\/', '\\/vcf\\/',normal_bam))),
+						 showWarnings = F)
+
 	command = paste('java -Xmx4g -jar', tool_paths$variant_calling$gatk,
 									'-T', 'HaplotypeCaller',
 									'-R', ref_genome,
 									'-I', normal_bam,
-									'-o', gsub('\\.bam$', '\\.vcf',normal_bam),
+									'-o', file.path(dirname(gsub('\\/bam\\/', '\\/vcf\\/', normal_bam)),
+																	basename(gsub('\\.bam$', '\\.vcf', normal_bam))),
 									'--dpsnp', db_snp,
 									'--cosmic', cosmic_db,
 									'--maxNumHaplotypesInPopulation', 96,
@@ -322,13 +326,17 @@ callSomaticVariantsUsingGatkMutect2 = function(normal_bam, tumor_bam, ref_genome
 		stop('Please check bam file and/or ref_genome/dbsnp/cosmic paths')
 	}
 
+	dir.create(file.path(dirname(gsub('\\/bam\\/', '\\/vcf\\/', tumor_bam))),
+						 showWarnings = F)
+
 	command = paste('java -Xmx4g -jar', tool_paths$variant_calling$gatk,
 									'-T', 'MuTect2',
 									'-R', ref_genome,
 									'-I:tumor', tumor_bam,
 									'-I:normal', normal_bam,
 									'-U', 'ALLOW_SEQ_DICT_INCOMPATIBILITY',
-									'-o', gsub('\\.bam$', '\\.vcf',tumor_bam),
+									'-o', file.path(dirname(gsub('\\/bam\\/', '\\/vcf\\/', tumor_bam)),
+																	basename(gsub('\\.bam$', '\\.vcf', tumor_bam))),
 									'--dpsnp', db_snp,
 									'--cosmic', cosmic_db,
 									'--tumor_lod', 8,
