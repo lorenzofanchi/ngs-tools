@@ -298,24 +298,45 @@ performMiXcrCloneExport = function(clones, chain = NULL, execute = FALSE) {
 
 # Variant calling ---------------------------------------------------------
 
-callGermlineAndSomaticVariants = function(normal_bam, tumor_bam, ref_genome, execute = FALSE) {
-	if (any(!sapply(c(normal_bam, tumor_bam, ref_genome), file.exists))) {
-		stop('Please check bam file and/or ref genome paths')
+callGermlineVariantsUsingGatkHaplotypeCaller = function(normal_bam, ref_genome = tool_options$general$fasta_dna, db_snp = tool_options$general$snp_db, execute = FALSE) {
+	if (any(!sapply(c(normal_bam, ref_genome, db_snp), file.exists))) {
+		stop('Please check bam file and/or ref_genome/dbsnp/cosmic paths')
 	}
 
-	normal_pileup = paste(tool_paths$general$samtools,
-												'mpileup',
-												'-q', 1,
-												'-f', ref_genome,
-												normal_bam)
-	tumor_pileup = paste(tool_paths$general$samtools,
-												'mpileup',
-												'-q', 1,
-												'-f', ref_genome,
-												tumor_bam)
+	command = paste('java -Xmx4g -jar', tool_paths$variant_calling$gatk,
+									'-T', 'HaplotypeCaller',
+									'-R', ref_genome,
+									'-I', normal_bam,
+									'-o', gsub('\\.bam$', '\\.vcf',normal_bam),
+									'--dpsnp', db_snp,
+									'--cosmic', cosmic_db,
+									'--maxNumHaplotypesInPopulation', 96,
+									'--dontUseSoftClippedBases',
+									'--annotateNDA')
 
-	command = paste('java -jar', tool_paths$variant_calling$varscan2, 'somatic',
-									'<(', normal_pileup,')', '<(', tumor_pileup, ')', basename(tumor_bam))
+	commandWrapper(command = command, execute = execute)
+}
+
+callSomaticVariantsUsingGatkMutect2 = function(normal_bam, tumor_bam, ref_genome = tool_options$general$fasta_dna, db_snp = tool_options$general$snp_db, cosmic_db = tool_options$general$cosmic_db, execute = FALSE) {
+	if (any(!sapply(c(normal_bam, tumor_bam, ref_genome, db_snp, cosmic_db), file.exists))) {
+		stop('Please check bam file and/or ref_genome/dbsnp/cosmic paths')
+	}
+
+	command = paste('java -Xmx4g -jar', tool_paths$variant_calling$gatk,
+									'-T', 'MuTect2',
+									'-R', ref_genome,
+									'-I:tumor', tumor_bam,
+									'-I:normal', normal_bam,
+									'-U', 'ALLOW_SEQ_DICT_INCOMPATIBILITY',
+									'-o', gsub('\\.bam$', '\\.vcf',tumor_bam),
+									'--dpsnp', db_snp,
+									'--cosmic', cosmic_db,
+									'--tumor_lod', 8,
+									'--max_alt_alleles_in_normal_count', 10,
+									'--max_alt_alleles_in_normal_qscore_sum', 400,
+									'--maxNumHaplotypesInPopulation', 96,
+									'--dontUseSoftClippedBases',
+									'--annotateNDA')
 
 	commandWrapper(command = command, execute = execute)
 }
