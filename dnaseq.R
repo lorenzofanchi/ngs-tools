@@ -14,8 +14,10 @@ bam_files = list.files(path = file.path(data_path, '1c_dnaseq_data/bam'),
 											 full.names = TRUE)
 
 # perform variant calling
+callSomaticVariantsUsingGatkMutect2(normal_bam = ,
+																		tumor_bam = )
 
-
+callGermlineVariantsUsingGatkHaplotypeCaller(normal_bam = )
 
 
 # Variant annotation ------------------------------------------------------
