@@ -312,7 +312,7 @@ callGermlineVariantsUsingGatkHaplotypeCaller = function(normal_bam, ref_genome =
 									'-I', normal_bam,
 									'-o', file.path(dirname(gsub('\\/bam\\/', '\\/vcf\\/', normal_bam)),
 																	basename(gsub('\\.bam$', '\\.vcf', normal_bam))),
-									'--dpsnp', db_snp,
+									'--dbsnp', db_snp,
 									'--cosmic', cosmic_db,
 									'--maxNumHaplotypesInPopulation', 96,
 									'--dontUseSoftClippedBases',
