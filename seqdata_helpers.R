@@ -302,9 +302,11 @@ performBaseQualityRecalibrationUsingGatk = function(bam,
 																										ref_genome = tool_options$general$fasta_dna,
 																										bed_regions = NULL,
 																										db_snp = tool_options$general$snp_db,
+																										n_threads = 4,
 																										execute = FALSE) {
 	# perform base quality recalibration
 	command_bq = paste('java -Xmx4g -jar', tool_paths$variant_calling$gatk,
+	                   '-nt', n_threads,
 										 '-T', 'BaseRecalibrator',
 										 '-R', ref_genome,
 										 '-I', bam,
@@ -313,7 +315,8 @@ performBaseQualityRecalibrationUsingGatk = function(bam,
 
 	# Prints all reads that have a mapping quality above zero
 	command_pr = paste('java -Xmx4g -jar', tool_paths$variant_calling$gatk,
-										 '-T', 'PrintReads',
+	                   '-nt', n_threads,
+	                   '-T', 'PrintReads',
 										 '-R', ref_genome,
 										 '-I', bam,
 										 '-o', gsub('\\.bam$', '-bq.bam', bam),
@@ -329,6 +332,7 @@ callGermlineVariantsUsingGatkHaplotypeCaller = function(normal_bam,
 																												ref_genome = tool_options$general$fasta_dna,
 																												bed_regions = NULL,
 																												db_snp = tool_options$general$snp_db,
+																												n_threads = 4,
 																												execute = FALSE) {
 	if (any(!sapply(c(normal_bam, ref_genome, db_snp), file.exists))) {
 		stop('Please check bam file and/or ref_genome/dbsnp/cosmic paths')
@@ -338,6 +342,7 @@ callGermlineVariantsUsingGatkHaplotypeCaller = function(normal_bam,
 						 showWarnings = F)
 
 	command = paste('java -Xmx8g -jar', tool_paths$variant_calling$gatk,
+	                '-nt', n_threads,
 									'-T', 'HaplotypeCaller',
 									'-R', ref_genome,
 									'-I', normal_bam,
@@ -358,6 +363,7 @@ callSomaticVariantsUsingGatkMutect2 = function(normal_bam,
 																							 bed_regions = NULL,
 																							 db_snp = tool_options$general$snp_db,
 																							 cosmic_db = tool_options$general$cosmic_db,
+																							 n_threads = 4,
 																							 execute = FALSE) {
 	if (any(!sapply(c(normal_bam, tumor_bam, ref_genome, db_snp, cosmic_db), file.exists))) {
 		stop('Please check bam file and/or ref_genome/dbsnp/cosmic paths')
@@ -367,6 +373,7 @@ callSomaticVariantsUsingGatkMutect2 = function(normal_bam,
 						 showWarnings = F)
 
 	command = paste('java -Xmx8g -jar', tool_paths$variant_calling$gatk,
+	                '-nt', n_threads,
 									'-T', 'MuTect2',
 									'-R', ref_genome,
 									'-I:tumor', tumor_bam,
