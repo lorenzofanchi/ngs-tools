@@ -394,7 +394,7 @@ callSomaticVariantsUsingGatkMutect2 = function(normal_bam,
 	commandWrapper(command = command, execute = execute)
 }
 
-mergeGatkSomaticAndGermlineVariants = function(somatic_vcf, germline_vcf) {
+mergeGatkSomaticAndGermlineVariants = function(somatic_vcf, germline_vcf, qual_cutoff = 100) {
 	# read VCFs, separate headers and variant calls
 	vcfs = setNames(object = lapply(c(somatic_vcf, germline_vcf),
 																	function(file) {
@@ -455,7 +455,7 @@ mergeGatkSomaticAndGermlineVariants = function(somatic_vcf, germline_vcf) {
 						 con = gsub('\\.vcf$', '-complete.vcf', somatic_vcf),
 						 sep = '\n')
 	write.table(x = merged_vcf$variants[(FILTER == 'PASS' | FILTER == '.') # filter somatic variants for FILTER == PASS
-																			& (QUAL == '.' | QUAL >= 200)], # filter germline variants QUAL >= 200
+																			& (QUAL == '.' | QUAL >= qual_cutoff)], # filter germline variants QUAL >= cutoff
 							file = gsub('\\.vcf$', '-complete.vcf', somatic_vcf),
 							append = T,
 							quote = F,
