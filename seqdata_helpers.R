@@ -394,6 +394,76 @@ callSomaticVariantsUsingGatkMutect2 = function(normal_bam,
 	commandWrapper(command = command, execute = execute)
 }
 
+mergeGatkSomaticAndGermlineVariants = function(somatic_vcf, germline_vcf) {
+	# read VCFs, separate headers and variant calls
+	vcfs = setNames(object = lapply(c(somatic_vcf, germline_vcf),
+																	function(file) {
+																		all_data = readLines(file)
+																		header_data = all_data[grepl(pattern = '^#', x =  all_data)]
+																		variant_data = fread(input = paste0(all_data[!grepl(pattern = '^#', x =  all_data)], collapse = '\n'), sep = '\t')
+
+																		setnames(x = variant_data, unlist(strsplit(x = header_data[length(header_data)], split = '\t')))
+
+																		if (length(names(variant_data)) == 10) {
+																			# replace germline sample name with 'NORMAL' to allow merging germline and tumor VCFs
+																			message('Replacing "', names(variant_data)[10], '" with "NORMAL" in VCF "', basename(file), '" header')
+																			setnames(x = variant_data, old = names(variant_data)[10], new = 'NORMAL')
+																			variant_data[, TUMOR := NA]
+
+																			# add gs_id to germline variants
+																			variant_data[, ID := paste0('gs', 1:.N, ';', ID)]
+																		}
+
+																		return(list(headers = header_data, variants = variant_data))
+																	}),
+									nm = basename(c(somatic_vcf, germline_vcf)))
+
+	# merge unfiltered vcfs
+	merged_vcf = list(headers = c(grep('^##fileformat', vcfs[[basename(somatic_vcf)]]$headers, value = T),
+																unlist(sapply(basename(c(somatic_vcf, germline_vcf)),
+																							function(filename) grep('^##FILTER', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+																unlist(sapply(basename(c(somatic_vcf, germline_vcf)),
+																							function(filename) grep('^##FORMAT', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+																unlist(sapply(basename(c(somatic_vcf, germline_vcf)),
+																							function(filename) grep('^##(fileformat|FILTER|FORMAT|INFO|SAMPLE|contig|reference)|^#CHROM', vcfs[[filename]]$headers, value = T, invert = T, ignore.case = T), USE.NAMES = F)),
+																unlist(sapply(basename(c(somatic_vcf, germline_vcf)),
+																							function(filename) grep('^##INFO', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+																unlist(sapply(basename(c(somatic_vcf, germline_vcf)),
+																							function(filename) grep('^##SAMPLE', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+																unlist(sapply(basename(c(somatic_vcf)),
+																							function(filename) grep('^##contig', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+																unlist(sapply(basename(c(somatic_vcf)),
+																							function(filename) grep('^##reference', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+																vcfs[[basename(somatic_vcf)]]$headers[length(vcfs[[basename(somatic_vcf)]]$headers)]),
+										variants = rbindlist(lapply(basename(c(somatic_vcf, germline_vcf)),
+																								function(filename) vcfs[[filename]]$variants), use.names = TRUE))
+
+	# write unfiltered vcfs
+	writeLines(text = merged_vcf$headers,
+						 con = gsub('\\.vcf$', '-complete-unfiltered.vcf', somatic_vcf),
+						 sep = '\n')
+	write.table(x = merged_vcf$variants,
+							file = gsub('\\.vcf$', '-complete-unfiltered.vcf', somatic_vcf),
+							append = T,
+							quote = F,
+							sep = '\t',
+							row.names = F,
+							col.names = F)
+
+	# write filtered vcfs
+	writeLines(text = merged_vcf$headers,
+						 con = gsub('\\.vcf$', '-complete.vcf', somatic_vcf),
+						 sep = '\n')
+	write.table(x = merged_vcf$variants[(FILTER == 'PASS' | FILTER == '.') # filter somatic variants for FILTER == PASS
+																			& (QUAL == '.' | QUAL >= 200)], # filter germline variants QUAL >= 200
+							file = gsub('\\.vcf$', '-complete.vcf', somatic_vcf),
+							append = T,
+							quote = F,
+							sep = '\t',
+							row.names = F,
+							col.names = F)
+}
+
 # RNA quantification ------------------------------------------------------
 
 # quantify using cufflinks
