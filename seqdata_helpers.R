@@ -469,9 +469,9 @@ mergeGatkSomaticAndGermlineVariants = function(somatic_vcf, germline_vcf, qual_c
 slopCoordinatesUsingBedtools = function(vcf, n_bases = 200, ref_genome = tool_options$general$fasta_dna, execute = TRUE) {
 	command_snpsift = paste('java -jar',
 													tool_paths$general$snpsift,
-													vcf,
 													'filter',
-													'\"FILTER = \'PASS\'\"')
+													'\"FILTER = \'PASS\'\"',
+													vcf)
 
 	command_awk = paste('cut',
 											'-f1,2',
