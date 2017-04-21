@@ -467,6 +467,11 @@ mergeGatkSomaticAndGermlineVariants = function(somatic_vcf, germline_vcf, qual_c
 }
 
 slopCoordinatesUsingBedtools = function(vcf, n_bases = 200, ref_genome = tool_options$general$fasta_dna, execute = TRUE) {
+	command_snpsift = paste('java -jar',
+													tool_paths$general$snpsift,
+													'filter',
+													'\"FILTER = \'PASS\'\"')
+
 	command_awk = paste('cut',
 											'-f1,2',
 											vcf,
@@ -484,7 +489,7 @@ slopCoordinatesUsingBedtools = function(vcf, n_bases = 200, ref_genome = tool_op
 												'merge',
 												'>', gsub('\\.vcf$', '.bed', vcf))
 
-	command = paste(command_awk, command_slop, command_merge, sep = ' | ')
+	command = paste(command_snpsift, command_awk, command_slop, command_merge, sep = ' | ')
 
 	commandWrapper(command = command, execute = execute)
 }
