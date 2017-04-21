@@ -32,6 +32,7 @@ invisible(mapply(function(normal, tumor) callSomaticVariantsUsingGatkMutect2(nor
 slopCoordinatesUsingBedtools(vcf = )
 
 callGermlineVariantsUsingGatkHaplotypeCaller(normal_bam = ,
+																						 n_threads = 1,
 																						 bed_regions = )
 
 
