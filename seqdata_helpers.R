@@ -473,10 +473,10 @@ slopCoordinatesUsingBedtools = function(vcf, n_bases = 200, ref_genome = tool_op
 											'| awk \'{OFS=\"\t\"; print $1,$2,$2}\'')
 
 	command_slop = paste(tool_paths$general$bedtools,
-									'slop',
-									'-b', n_bases,
-									'-i', stdin,
-									'-g', paste0(ref_genome, '.fai'))
+											 'slop',
+											 '-b', n_bases,
+											 '-i', 'stdin',
+											 '-g', paste0(ref_genome, '.fai'))
 
 	command_merge = paste('sort -k1,1 -k2,2n |',
 												tool_paths$general$bedtools,
