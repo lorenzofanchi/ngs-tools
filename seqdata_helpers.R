@@ -13,7 +13,8 @@ if (!p_isinstalled('rtracklayer')) {
 pacman::p_load(char = required_packages)
 
 # general parameters
-tool_paths = list(general = list(gffread = 'gffread',
+tool_paths = list(general = list(bedtools = '~/libs/bedtools-2.26.0/bin/bedtools',
+																 gffread = 'gffread',
 																 samtools = '~/libs/samtools-1.4/bin/samtools',
 																 picard = '~/libs/picard-tools-2.9.0/picard.jar',
 																 trimmomatic = '~/libs/Trimmomatic-0.36/trimmomatic-0.36.jar',
