@@ -481,7 +481,7 @@ slopCoordinatesUsingBedtools = function(vcf, n_bases = 200, ref_genome = tool_op
 	command_merge = paste('sort -k1,1 -k2,2n |',
 												tool_paths$general$bedtools,
 												'merge',
-												'>', gsub('\.vcf$', '.bed', vcf))
+												'>', gsub('\\.vcf$', '.bed', vcf))
 
 	command = paste(command_awk, command_slop, command_merge, sep = ' | ')
 
