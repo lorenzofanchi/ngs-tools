@@ -68,14 +68,14 @@ tool_options = list(general = list(parallel_threads = 18,
 # Convenience functions ---------------------------------------------------
 
 # wrapper for executing commands (or not)
-commandWrapper = function(command, nice = 19, wait = TRUE, execute) {
+commandWrapper = function(command, nice = 19, intern = FALSE, wait = TRUE, execute) {
 	if (is.numeric(nice)) {command = paste('nice -n', nice, command)}
 
 	if (!execute) {command = paste('nohup', command, '2> nohup.out &\n')}
 
 	if (execute) {
 		system(command = command,
-					 intern = FALSE,
+					 intern = intern,
 					 wait = wait)
 	} else {
 		message(command)
