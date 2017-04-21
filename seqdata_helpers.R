@@ -465,6 +465,29 @@ mergeGatkSomaticAndGermlineVariants = function(somatic_vcf, germline_vcf, qual_c
 							col.names = F)
 }
 
+slopCoordinatesUsingBedtools = function(vcf, n_bases = 200, ref_genome = tool_options$general$fasta_dna, execute = TRUE) {
+	command_awk = paste('cut',
+											'-f1,2',
+											vcf,
+											'| grep -v \"#\"',
+											'| awk \'{OFS=\"\t\"; print $1,$2,$2}\'')
+
+	command_slop = paste(tool_paths$general$bedtools,
+									'slop',
+									'-b', n_bases,
+									'-i', stdin,
+									'-g', paste0(ref_genome, '.fai'))
+
+	command_merge = paste('sort -k1,1 -k2,2n |',
+												tool_paths$general$bedtools,
+												'merge',
+												'>', gsub('\.vcf$', '.bed', vcf))
+
+	command = paste(command_awk, command_slop, command_merge, sep = ' | ')
+
+	commandWrapper(command = command, execute = execute)
+}
+
 # RNA quantification ------------------------------------------------------
 
 # quantify using cufflinks
