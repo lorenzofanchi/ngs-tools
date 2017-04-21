@@ -29,6 +29,8 @@ invisible(mapply(function(normal, tumor) callSomaticVariantsUsingGatkMutect2(nor
 								 bam_files[seq(1, length(bam_files), 2)],
 								 bam_files[seq(2, length(bam_files), 2)])) ## check that this works out for you paired samples!
 
+slopCoordinatesUsingBedtools(vcf = )
+
 callGermlineVariantsUsingGatkHaplotypeCaller(normal_bam = ,
 																						 bed_regions = )
 
