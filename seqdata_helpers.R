@@ -402,7 +402,7 @@ mergeGatkSomaticAndGermlineVariants = function(somatic_vcf, germline_vcf, qual_c
 																	function(file) {
 																		all_data = readLines(file)
 																		header_data = all_data[grepl(pattern = '^#', x =  all_data)]
-																		variant_data = fread(input = paste0(all_data[!grepl(pattern = '^#', x =  all_data)], collapse = '\n'), sep = '\t')
+																		variant_data = fread(input = paste0(all_data[!grepl(pattern = '^#', x =  all_data)], collapse = '\n'), sep = '\t', na.strings = c('NA', 'N.A.', '.', ''))
 
 																		setnames(x = variant_data, unlist(strsplit(x = header_data[length(header_data)], split = '\t')))
 
@@ -449,7 +449,7 @@ mergeGatkSomaticAndGermlineVariants = function(somatic_vcf, germline_vcf, qual_c
 							append = T,
 							quote = F,
 							sep = '\t',
-							na = '',
+							na = '.',
 							row.names = F,
 							col.names = F)
 
@@ -457,13 +457,13 @@ mergeGatkSomaticAndGermlineVariants = function(somatic_vcf, germline_vcf, qual_c
 	writeLines(text = merged_vcf$headers,
 						 con = gsub('\\.vcf$', '-complete.vcf', somatic_vcf),
 						 sep = '\n')
-	write.table(x = merged_vcf$variants[(FILTER == 'PASS' | FILTER == '.') # filter somatic variants for FILTER == PASS
-																			& (QUAL == '.' | QUAL >= qual_cutoff)], # filter germline variants QUAL >= cutoff
+	write.table(x = merged_vcf$variants[(is.na(FILTER) | FILTER == 'PASS') # filter somatic variants for 'FILTER == PASS', take germline variants along with 'FILTER == NA'
+																			& (is.na(QUAL) | QUAL >= qual_cutoff)], # filter germline variants 'QUAL >= qual_cutoff', take somatic variants along with 'QUAL == NA'
 							file = gsub('\\.vcf$', '-complete.vcf', somatic_vcf),
 							append = T,
 							quote = F,
 							sep = '\t',
-							na = '',
+							na = '.',
 							row.names = F,
 							col.names = F)
 }
