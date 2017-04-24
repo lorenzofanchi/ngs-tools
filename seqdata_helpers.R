@@ -449,6 +449,7 @@ mergeGatkSomaticAndGermlineVariants = function(somatic_vcf, germline_vcf, qual_c
 							append = T,
 							quote = F,
 							sep = '\t',
+							na = '',
 							row.names = F,
 							col.names = F)
 
@@ -462,6 +463,7 @@ mergeGatkSomaticAndGermlineVariants = function(somatic_vcf, germline_vcf, qual_c
 							append = T,
 							quote = F,
 							sep = '\t',
+							na = '',
 							row.names = F,
 							col.names = F)
 }
