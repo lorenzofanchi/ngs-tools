@@ -12,7 +12,7 @@ registerDoMC(2)
 # base quality recalibration
 bam_files = list.files(path = file.path(data_path, '1c_dnaseq_data/bam'),
 											 pattern = '\\.bam$',
-											 full.names = TRUE)
+											 full.names = TRUE) %>% grep('-bq', ., invert = T, value = T)
 
 invisible(sapply(bam_files,
 								 function(file) performBaseQualityRecalibrationUsingGatk(bam = file,
