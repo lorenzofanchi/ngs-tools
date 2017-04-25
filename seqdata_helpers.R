@@ -499,6 +499,30 @@ slopCoordinatesUsingBedtools = function(vcf, n_bases = 200, ref_genome = tool_op
 	commandWrapper(command = command, execute = execute)
 }
 
+splitBed = function(bed, n_split, execute = TRUE) {
+	bed_data = fread(bed, header = F, col.names = c('chromosome', 'start', 'end'))
+
+	split_index = seq(from = 1,
+										to =  length(bed_data[, unique(chromosome)]),
+										by = round(length(bed_data[, unique(chromosome)]) / n_split))
+
+	bed_split = lapply(split_index,
+										 function(idx) {
+										 	bed_data[grepl(paste0('^',bed_data[, unique(chromosome)][idx:(idx + n_split - 1)], collapse = '|', '$'), chromosome), ]
+										 })
+
+	invisible(sapply(seq(1, length(split_index)),
+									 function(i) {
+									 	write.table(x = bed_split[[i]],
+									 							file = file.path(dirname(bed), gsub('\\.bed', paste0('_', i, '.bed'), basename(bed))),
+									 							append = F,
+									 							quote = F,
+									 							sep = '\t',
+									 							row.names = F,
+									 							col.names = F)
+									 }))
+}
+
 # RNA quantification ------------------------------------------------------
 
 # quantify using cufflinks
