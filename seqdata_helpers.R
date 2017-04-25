@@ -302,9 +302,8 @@ performMiXcrCloneExport = function(clones, chain = NULL, execute = FALSE) {
 
 performBaseQualityRecalibrationUsingGatk = function(bam,
 																										ref_genome = tool_options$general$fasta_dna,
-																										bed_regions = NULL,
 																										db_snp = tool_options$general$snp_db,
-																										n_threads = 4,
+																										n_threads = 1,
 																										execute = FALSE) {
 	# perform base quality recalibration
 	command_bq = paste('java -Xmx4g -jar', tool_paths$variant_calling$gatk,
