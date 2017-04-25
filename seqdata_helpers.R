@@ -362,6 +362,7 @@ callGermlineVariantsUsingGatkHaplotypeCaller = function(normal_bam,
 
 callSomaticVariantsUsingGatkMutect2 = function(normal_bam,
 																							 tumor_bam,
+																							 output_vcf = NULL,
 																							 ref_genome = tool_options$general$fasta_dna,
 																							 bed_regions = NULL,
 																							 bed_slop = 150,
@@ -385,8 +386,13 @@ callSomaticVariantsUsingGatkMutect2 = function(normal_bam,
 									'-I:tumor', tumor_bam,
 									'-I:normal', normal_bam,
 									'-U', 'ALLOW_SEQ_DICT_INCOMPATIBILITY',
-									'-o', file.path(dirname(gsub('\\/bam\\/', '\\/vcf\\/', tumor_bam)),
-																	basename(gsub('\\.bam$', '\\.vcf', tumor_bam))),
+									'-o',
+									if (!is.null(output_vcf)) {
+										output_vcf
+									} else {
+										file.path(dirname(gsub('\\/bam\\/', '\\/vcf\\/', tumor_bam)),
+															basename(gsub('\\.bam$', '\\.vcf', tumor_bam)))
+									},
 									'--dbsnp', db_snp,
 									'--cosmic', cosmic_db,
 									'--tumor_lod', 8,
@@ -396,7 +402,7 @@ callSomaticVariantsUsingGatkMutect2 = function(normal_bam,
 									'--dontUseSoftClippedBases',
 									'--annotateNDA')
 
-	commandWrapper(command = command, execute = execute)
+	commandWrapper(command = command, wait = F, execute = execute)
 }
 
 mergeGatkSomaticAndGermlineVariants = function(somatic_vcf, germline_vcf, qual_cutoff = 100) {
