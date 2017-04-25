@@ -72,7 +72,7 @@ tool_options = list(general = list(parallel_threads = 18,
 commandWrapper = function(command, nice = 19, intern = FALSE, wait = TRUE, execute) {
 	if (is.numeric(nice)) {command = paste('nice -n', nice, command)}
 
-	if (!execute) {command = paste('nohup', command, '2> nohup.out &\n')}
+	if (!execute) {command = paste('nohup', command, '> nohup.out &\n')}
 
 	if (execute) {
 		system(command = command,
