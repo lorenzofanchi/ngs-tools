@@ -367,7 +367,7 @@ callSomaticVariantsUsingGatkMutect2 = function(normal_bam,
 																							 bed_slop = 150,
 																							 db_snp = tool_options$general$snp_db,
 																							 cosmic_db = tool_options$general$cosmic_db,
-																							 n_threads = 4,
+																							 n_threads = 1,
 																							 execute = FALSE) {
 	if (any(!sapply(c(normal_bam, tumor_bam, ref_genome, db_snp, cosmic_db), file.exists))) {
 		stop('Please check bam file and/or ref_genome/dbsnp/cosmic paths')
