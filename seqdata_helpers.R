@@ -330,6 +330,7 @@ performBaseQualityRecalibrationUsingGatk = function(bam,
 }
 
 callGermlineVariantsUsingGatkHaplotypeCaller = function(normal_bam,
+																												output_vcf,
 																												ref_genome = tool_options$general$fasta_dna,
 																												bed_regions = NULL,
 																												bed_slop = 150,
@@ -340,7 +341,7 @@ callGermlineVariantsUsingGatkHaplotypeCaller = function(normal_bam,
 		stop('Please check bam file and/or ref_genome/dbsnp/cosmic paths')
 	}
 
-	dir.create(file.path(dirname(gsub('\\/bam\\/', '\\/vcf\\/',normal_bam))),
+	dir.create(file.path(dirname(output_vcf)),
 						 showWarnings = F)
 
 	command = paste('java -Xmx8g -jar', tool_paths$variant_calling$gatk,
@@ -350,19 +351,18 @@ callGermlineVariantsUsingGatkHaplotypeCaller = function(normal_bam,
 									if (!is.null(bed_regions)) { paste('-L', bed_regions) },
 									if (!is.null(bed_regions)) { paste('--interval_padding', bed_slop) },
 									'-I', normal_bam,
-									'-o', file.path(dirname(gsub('\\/bam\\/', '\\/vcf\\/', normal_bam)),
-																	basename(gsub('\\.bam$', '\\.vcf', normal_bam))),
+									'-o', output_vcf,
 									'--dbsnp', db_snp,
 									'--maxNumHaplotypesInPopulation', 96,
 									'--dontUseSoftClippedBases',
 									'--annotateNDA')
 
-	commandWrapper(command = command, execute = execute)
+	commandWrapper(command = command, wait = F, execute = execute)
 }
 
 callSomaticVariantsUsingGatkMutect2 = function(normal_bam,
 																							 tumor_bam,
-																							 output_vcf = NULL,
+																							 output_vcf,
 																							 ref_genome = tool_options$general$fasta_dna,
 																							 bed_regions = NULL,
 																							 bed_slop = 150,
@@ -374,7 +374,7 @@ callSomaticVariantsUsingGatkMutect2 = function(normal_bam,
 		stop('Please check bam file and/or ref_genome/dbsnp/cosmic paths')
 	}
 
-	dir.create(file.path(dirname(gsub('\\/bam\\/', '\\/vcf\\/', tumor_bam))),
+	dir.create(file.path(dirname(output_vcf)),
 						 showWarnings = F)
 
 	command = paste('java -Xmx8g -jar', tool_paths$variant_calling$gatk,
@@ -386,13 +386,7 @@ callSomaticVariantsUsingGatkMutect2 = function(normal_bam,
 									'-I:tumor', tumor_bam,
 									'-I:normal', normal_bam,
 									'-U', 'ALLOW_SEQ_DICT_INCOMPATIBILITY',
-									'-o',
-									if (!is.null(output_vcf)) {
-										output_vcf
-									} else {
-										file.path(dirname(gsub('\\/bam\\/', '\\/vcf\\/', tumor_bam)),
-															basename(gsub('\\.bam$', '\\.vcf', tumor_bam)))
-									},
+									'-o', output_vcf,
 									'--dbsnp', db_snp,
 									'--cosmic', cosmic_db,
 									'--tumor_lod', 8,
