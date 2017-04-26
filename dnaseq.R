@@ -77,5 +77,5 @@ file.path(dirname(gsub('\\/bam\\/', '\\/vcf\\/', mutect_runtable[, unique(bam_no
 					basename(gsub('\\.bam', '.vcf', mutect_runtable[, unique(bam_normal)])))))
 
 # merge somatic and germline variants
-mergeVcfs = function(somatic_vcf = ,
-										 germline_vcf = )
+mergeVcfs(somatic_vcf = ,
+					germline_vcf = )
