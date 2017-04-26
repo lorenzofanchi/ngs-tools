@@ -399,9 +399,21 @@ callSomaticVariantsUsingGatkMutect2 = function(normal_bam,
 	commandWrapper(command = command, wait = F, execute = execute)
 }
 
-mergeGatkSomaticAndGermlineVariants = function(somatic_vcf, germline_vcf, qual_cutoff = 100) {
+mergeVcfs = function(vcfs = NULL, somatic_vcf = NULL, germline_vcf = NULL, qual_cutoff = 100) {
+	# check which files to use
+	files = c(vcfs, somatic_vcf, germline_vcf)
+	if (!all(sapply(files, file.exists)) | all(is.null(c(vcfs, somatic_vcf, germline_vcf)))) { stop('Please check input file paths; some/all are missing') }
+
+	if (length(somatic_vcf) > 1 & length(germline_vcf) > 1) {
+		if (length(somatic_vcf) != length(germline_vcf)) {
+			stop('Equal number of germline and somatic variants must be provided')
+		} else {
+			warning('Joining germline and somatic variants in order provided')
+		}
+	}
+
 	# read VCFs, separate headers and variant calls
-	vcfs = setNames(object = lapply(c(somatic_vcf, germline_vcf),
+	vcfs = setNames(object = lapply(files,
 																	function(file) {
 																		all_data = readLines(file)
 																		header_data = all_data[grepl(pattern = '^#', x =  all_data)]
@@ -421,54 +433,81 @@ mergeGatkSomaticAndGermlineVariants = function(somatic_vcf, germline_vcf, qual_c
 
 																		return(list(headers = header_data, variants = variant_data))
 																	}),
-									nm = basename(c(somatic_vcf, germline_vcf)))
+									nm = basename(files))
+
+	if (!is.null(vcfs)) {
+		groups = data.table(file = names(vcfs),
+												cluster = cutree(hclust(as.dist(adist(names(vcfs)))),
+																				 h = 0.1 * mean(nchar(names(vcfs)))))
+	} else {
+		groups = data.table(file = names(vcfs),
+												cluster = rep(1:length(somatic_vcf), 2))
+	}
 
 	# merge unfiltered vcfs
-	merged_vcf = list(headers = c(grep('^##fileformat', vcfs[[basename(somatic_vcf)]]$headers, value = T),
-																unlist(sapply(basename(c(somatic_vcf, germline_vcf)),
-																							function(filename) grep('^##FILTER', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
-																unlist(sapply(basename(c(somatic_vcf, germline_vcf)),
-																							function(filename) grep('^##FORMAT', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
-																unlist(sapply(basename(c(somatic_vcf, germline_vcf)),
-																							function(filename) grep('^##(fileformat|FILTER|FORMAT|INFO|SAMPLE|contig|reference)|^#CHROM', vcfs[[filename]]$headers, value = T, invert = T, ignore.case = T), USE.NAMES = F)),
-																unlist(sapply(basename(c(somatic_vcf, germline_vcf)),
-																							function(filename) grep('^##INFO', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
-																unlist(sapply(basename(c(somatic_vcf, germline_vcf)),
-																							function(filename) grep('^##SAMPLE', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
-																unlist(sapply(basename(c(somatic_vcf)),
-																							function(filename) grep('^##contig', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
-																unlist(sapply(basename(c(somatic_vcf)),
-																							function(filename) grep('^##reference', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
-																vcfs[[basename(somatic_vcf)]]$headers[length(vcfs[[basename(somatic_vcf)]]$headers)]),
-										variants = rbindlist(lapply(basename(c(somatic_vcf, germline_vcf)),
-																								function(filename) vcfs[[filename]]$variants), use.names = TRUE))
+	merged_vcfs = setNames(object = lapply(groups[, unique(cluster)],
+																				 function(clstr) {
+																				 	cluster_files = groups[cluster == clstr, file]
+																				 	list(headers = unique(c(grep('^##fileformat', vcfs[[cluster_files[1]]]$headers, value = T),
+																				 													unlist(sapply(cluster_files,
+																				 																				function(filename) grep('^##FILTER', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+																				 													unlist(sapply(cluster_files,
+																				 																				function(filename) grep('^##FORMAT', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+																				 													unlist(sapply(cluster_files,
+																				 																				function(filename) grep('^##(fileformat|FILTER|FORMAT|INFO|SAMPLE|contig|reference)|^#CHROM', vcfs[[filename]]$headers, value = T, invert = T, ignore.case = T), USE.NAMES = F)),
+																				 													unlist(sapply(cluster_files,
+																				 																				function(filename) grep('^##INFO', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+																				 													unlist(sapply(cluster_files,
+																				 																				function(filename) grep('^##SAMPLE', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+																				 													unlist(sapply(cluster_files,
+																				 																				function(filename) grep('^##contig', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+																				 													unlist(sapply(cluster_files,
+																				 																				function(filename) grep('^##reference', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+																				 													vcfs[[cluster_files[1]]]$headers[length(vcfs[[cluster_files[1]]]$headers)])),
+																				 			 variants = rbindlist(lapply(cluster_files,
+																				 			 														function(filename) vcfs[[filename]]$variants), use.names = TRUE))
+																				 }),
+												 nm = gsub('_\\d+.vcf', '', groups[!duplicated(cluster), file]))
+
+	dir.create(path = dirname(files[1]),
+						 showWarnings = F)
 
 	# write unfiltered vcfs
-	writeLines(text = merged_vcf$headers,
-						 con = gsub('\\.vcf$', '-complete-unfiltered.vcf', somatic_vcf),
-						 sep = '\n')
-	write.table(x = merged_vcf$variants,
-							file = gsub('\\.vcf$', '-complete-unfiltered.vcf', somatic_vcf),
-							append = T,
-							quote = F,
-							sep = '\t',
-							na = '.',
-							row.names = F,
-							col.names = F)
+	invisible(sapply(1:length(merged_vcfs),
+									 function(i) {
+									 	writeLines(text = merged_vcfs[[i]]$headers,
+									 						 con = if (!is.null(vcfs)) { file.path(dirname(files[1]), paste0(names(merged_vcfs)[i], '.vcf')) }
+									 						 else { file.path(dirname(files[1]), paste0(names(merged_vcfs)[i], '-complete-unfiltered.vcf')) },
+									 						 sep = '\n')
+									 	write.table(x = merged_vcfs[[i]]$variants,
+									 							file = if (!is.null(vcfs)) { file.path(dirname(files[1]), paste0(names(merged_vcfs)[i], '.vcf')) }
+									 							else { file.path(dirname(files[1]), paste0(names(merged_vcfs)[i], '-complete-unfiltered.vcf')) },
+									 							append = T,
+									 							quote = F,
+									 							sep = '\t',
+									 							na = '.',
+									 							row.names = F,
+									 							col.names = F)
+									 }))
 
-	# write filtered vcfs
-	writeLines(text = merged_vcf$headers,
-						 con = gsub('\\.vcf$', '-complete.vcf', somatic_vcf),
-						 sep = '\n')
-	write.table(x = merged_vcf$variants[(is.na(FILTER) | FILTER == 'PASS') # filter somatic variants for 'FILTER == PASS', take germline variants along with 'FILTER == NA'
-																			& (is.na(QUAL) | QUAL >= qual_cutoff)], # filter germline variants 'QUAL >= qual_cutoff', take somatic variants along with 'QUAL == NA'
-							file = gsub('\\.vcf$', '-complete.vcf', somatic_vcf),
-							append = T,
-							quote = F,
-							sep = '\t',
-							na = '.',
-							row.names = F,
-							col.names = F)
+	if (is.null(vcfs)) {
+		# write filtered vcfs
+		invisible(sapply(1:length(merged_vcfs),
+										 function(i) {
+										 	writeLines(text = merged_vcfs[[i]]$headers,
+										 						 con = file.path(dirname(files[1]), paste0(names(merged_vcfs)[i], '-complete.vcf')),
+										 						 sep = '\n')
+										 	write.table(x = merged_vcfs[[i]]$variants[(is.na(FILTER) | FILTER == 'PASS') # filter somatic variants for 'FILTER == PASS', take germline variants along with 'FILTER == NA'
+										 																						& (is.na(QUAL) | QUAL >= qual_cutoff)], # filter germline variants 'QUAL >= qual_cutoff', take somatic variants along with 'QUAL == NA'
+										 							file = file.path(dirname(files[1]), paste0(names(merged_vcfs)[i], '-complete.vcf')),
+										 							append = T,
+										 							quote = F,
+										 							sep = '\t',
+										 							na = '.',
+										 							row.names = F,
+										 							col.names = F)
+										 }))
+	}
 }
 
 slopCoordinatesUsingBedtools = function(vcf, n_bases = 200, ref_genome = tool_options$general$fasta_dna, execute = TRUE) {
