@@ -17,7 +17,7 @@ invisible(sapply(bam_files,
                  function(file) performBaseQualityRecalibrationUsingGatk(bam = file)))
 
 # split bed file to perform parallel MuTect2 runs
-splitBed('', n_split = 6)
+splitBed('')
 
 # inventorize bed & bam files
 bed_files = list.files(path = file.path('~/resources/exome_bed'),
