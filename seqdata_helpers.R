@@ -547,7 +547,7 @@ splitBed = function(bed, n_split = 10, execute = TRUE) {
 
   bed_split = lapply(seq(1:(length(split_index) - 1)),
                      function(i) {
-                       bed_data[grepl(paste0('^',bed_data[, unique(chromosome)][split_index[i]:split_index[i + 1]], collapse = '|', '$'), chromosome), ]
+                       bed_data[grepl(paste0('^',bed_data[, unique(chromosome)][split_index[i]:(split_index[i + 1] - 1)], collapse = '|', '$'), chromosome), ]
                      })
   
   if (!all(unlist(sapply(bed_split, function(dt) dt[, unique(chromosome)])) %in% bed_data[, unique(chromosome)])) {
