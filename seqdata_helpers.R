@@ -538,19 +538,23 @@ slopCoordinatesUsingBedtools = function(vcf, n_bases = 200, ref_genome = tool_op
   commandWrapper(command = command, execute = execute)
 }
 
-splitBed = function(bed, n_split, execute = TRUE) {
+splitBed = function(bed, n_split = 10, execute = TRUE) {
   bed_data = fread(bed, header = F, col.names = c('chromosome', 'start', 'end'))
 
-  split_index = seq(from = 1,
-                    to =  length(bed_data[, unique(chromosome)]),
-                    by = round(length(bed_data[, unique(chromosome)]) / n_split))
+  split_index = round(seq(from = 1,
+                          to =  length(bed_data[, unique(chromosome)]),
+                          length.out = n_split + 1))
 
-  bed_split = lapply(split_index,
-                     function(idx) {
-                       bed_data[grepl(paste0('^',bed_data[, unique(chromosome)][idx:(idx + n_split - 1)], collapse = '|', '$'), chromosome), ]
+  bed_split = lapply(seq(1:(length(split_index) - 1)),
+                     function(i) {
+                       bed_data[grepl(paste0('^',bed_data[, unique(chromosome)][split_index[i]:split_index[i + 1]], collapse = '|', '$'), chromosome), ]
                      })
+  
+  if (!all(unlist(sapply(bed_split, function(dt) dt[, unique(chromosome)])) %in% bed_data[, unique(chromosome)])) {
+    stop('Splitting error, chromosomes missing from split bed files')
+  }
 
-  invisible(sapply(seq(1, length(split_index)),
+  invisible(sapply(seq(1, length(bed_split)),
                    function(i) {
                      write.table(x = bed_split[[i]],
                                  file = file.path(dirname(bed), gsub('\\.bed', paste0('_', i, '.bed'), basename(bed))),
