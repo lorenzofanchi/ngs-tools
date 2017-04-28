@@ -3,7 +3,7 @@
 if (!require('pacman')) install.packages('pacman')
 library(pacman)
 
-required_packages = c('data.table', 'doMC', 'dplyr', 'dtplyr', 'parallel', 'pbapply', 'rtracklayer', 'stringr')
+required_packages = c('data.table', 'doMC', 'dplyr', 'dtplyr', 'naturalsort', 'parallel', 'pbapply', 'rtracklayer', 'stringr')
 
 if (!p_isinstalled('rtracklayer')) {
   source('https://bioconductor.org/biocLite.R')
