@@ -447,25 +447,34 @@ mergeVcfs = function(vcfs = NULL, somatic_vcf = NULL, germline_vcf = NULL, qual_
   # merge unfiltered vcfs
   merged_vcfs = setNames(object = lapply(groups[, unique(cluster)],
                                          function(clstr) {
+                                           # make list of files to merge
                                            cluster_files = groups[cluster == clstr, file]
-                                           list(headers = unique(c(grep('^##fileformat', vcfs[[cluster_files[1]]]$headers, value = T),
-                                                                   unlist(sapply(cluster_files,
-                                                                                 function(filename) grep('^##FILTER', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
-                                                                   unlist(sapply(cluster_files,
-                                                                                 function(filename) grep('^##FORMAT', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
-                                                                   unlist(sapply(cluster_files,
-                                                                                 function(filename) grep('^##(fileformat|FILTER|FORMAT|INFO|SAMPLE|contig|reference)|^#CHROM', vcfs[[filename]]$headers, value = T, invert = T, ignore.case = T), USE.NAMES = F)),
-                                                                   unlist(sapply(cluster_files,
-                                                                                 function(filename) grep('^##INFO', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
-                                                                   unlist(sapply(cluster_files,
-                                                                                 function(filename) grep('^##SAMPLE', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
-                                                                   unlist(sapply(cluster_files,
-                                                                                 function(filename) grep('^##contig', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
-                                                                   unlist(sapply(cluster_files,
-                                                                                 function(filename) grep('^##reference', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
-                                                                   vcfs[[cluster_files[1]]]$headers[length(vcfs[[cluster_files[1]]]$headers)])),
-                                                variants = rbindlist(lapply(cluster_files,
-                                                                            function(filename) vcfs[[filename]]$variants), use.names = TRUE))
+                                           # merge headers & variants
+                                           merged_vcf = list(headers = unique(c(grep('^##fileformat', vcfs[[cluster_files[1]]]$headers, value = T),
+                                                                                unlist(sapply(cluster_files,
+                                                                                              function(filename) grep('^##FILTER', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+                                                                                unlist(sapply(cluster_files,
+                                                                                              function(filename) grep('^##FORMAT', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+                                                                                unlist(sapply(cluster_files,
+                                                                                              function(filename) grep('^##(fileformat|FILTER|FORMAT|INFO|SAMPLE|contig|reference)|^#CHROM', vcfs[[filename]]$headers, value = T, invert = T, ignore.case = T), USE.NAMES = F)),
+                                                                                unlist(sapply(cluster_files,
+                                                                                              function(filename) grep('^##INFO', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+                                                                                unlist(sapply(cluster_files,
+                                                                                              function(filename) grep('^##SAMPLE', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+                                                                                unlist(sapply(cluster_files,
+                                                                                              function(filename) grep('^##contig', vcfs[[filename]]$headers, value = T) %>% naturalsort(.), USE.NAMES = F)),
+                                                                                unlist(sapply(cluster_files,
+                                                                                              function(filename) grep('^##reference', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+                                                                                vcfs[[cluster_files[1]]]$headers[length(vcfs[[cluster_files[1]]]$headers)])),
+                                                             variants = rbindlist(lapply(cluster_files,
+                                                                                         function(filename) vcfs[[filename]]$variants), use.names = TRUE))
+                                           # determine order of contigs in vcf header
+                                           contig_order = str_extract(string = grep('##contig', merged_vcf$headers, value = T) %>% naturalsort(.),
+                                                                      pattern = '(?<=##contig=<ID=).+(?=,)')
+                                           # sort variants by contig order
+                                           merged_vcf$variants = rbindlist(lapply(contig_order,
+                                                                                  function(contig) merged_vcf$variants[grep(paste0('^', contig, '$'), merged_vcf$variants$`#CHROM`)], USE.NAMES = F))
+                                           return(merged_vcf)
                                          }),
                          nm = gsub('_\\d+.vcf', '', groups[!duplicated(cluster), file]))
 
