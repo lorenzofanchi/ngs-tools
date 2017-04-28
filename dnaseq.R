@@ -44,7 +44,7 @@ invisible(mapply(function(bam_normal, bam_tumor, bed, vcf) {
 },
 mutect_runtable[, bam_normal],
 mutect_runtable[, bam_tumor],
-mutect_runtable[, bed],
+mutect_runtable[, bed_files],
 mutect_runtable[, vcf_tumor]))
 
 # merge somatic vcfs
