@@ -22,11 +22,11 @@ splitBed('')
 # inventorize bed & bam files
 bed_files = list.files(path = file.path('~/resources/exome_bed'),
                        pattern = '_\\d+\\.bed$',
-                       full.names = TRUE)
+                       full.names = TRUE) %>% naturalsort(.)
 
 bam_files = list.files(path = file.path(data_path, '1c_dnaseq_data/bam'),
                        pattern = '-bq\\.bam$',
-                       full.names = TRUE)
+                       full.names = TRUE) %>% naturalsort(.)
 
 # make table with all permutations
 mutect_runtable = data.table(bam_normal = bam_files[seq(1, length(bam_files), 2)], # !!!@@@ check that these are your NORMAL bam files @@@!!!
@@ -50,7 +50,7 @@ mutect_runtable[, vcf_tumor]))
 # merge somatic vcfs
 vcf_files = list.files(path = file.path(data_path, '1c_dnaseq_data/vcf'),
                        pattern = '_\\d+.vcf$',
-                       full.names = TRUE)
+                       full.names = TRUE) %>% naturalsort(.)
 
 mergeVcfs(vcfs = vcf_files)
 
