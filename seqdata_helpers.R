@@ -545,11 +545,13 @@ splitBed = function(bed, n_split = 10, execute = TRUE) {
                           to =  length(bed_data[, unique(chromosome)]),
                           length.out = n_split + 1))
 
+  split_index[length(split_index)] = split_index[length(split_index)] + 1
+
   bed_split = lapply(seq(1:(length(split_index) - 1)),
                      function(i) {
                        bed_data[grepl(paste0('^',bed_data[, unique(chromosome)][split_index[i]:(split_index[i + 1] - 1)], collapse = '|', '$'), chromosome), ]
                      })
-  
+
   if (!all(unlist(sapply(bed_split, function(dt) dt[, unique(chromosome)])) %in% bed_data[, unique(chromosome)])) {
     stop('Splitting error, chromosomes missing from split bed files')
   }
