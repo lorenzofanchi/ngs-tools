@@ -59,7 +59,7 @@ vcf_files = list.files(path = file.path(data_path, '1c_dnaseq_data/vcf'),
                        pattern = '-bq\\.vcf$',
                        full.names = TRUE)
 
-sapply(vcf_files, function(file) slopCoordinatesUsingBedtools(vcf = file))
+invisible(sapply(vcf_files, function(file) slopCoordinatesUsingBedtools(vcf = file)))
 
 # perform germline variant calling
 bed_slop_files = list.files(path = file.path(data_path, '1c_dnaseq_data/vcf'),
