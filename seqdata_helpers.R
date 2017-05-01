@@ -473,7 +473,7 @@ mergeVcfs = function(vcfs = NULL, somatic_vcf = NULL, germline_vcf = NULL, qual_
                                                                       pattern = '(?<=##contig=<ID=).+(?=,)')
                                            # sort variants by contig order
                                            merged_vcf$variants = rbindlist(lapply(contig_order,
-                                                                                  function(contig) merged_vcf$variants[grep(paste0('^', contig, '$'), merged_vcf$variants$`#CHROM`)], USE.NAMES = F))
+                                                                                  function(contig) merged_vcf$variants[grep(paste0('^', contig, '$'), merged_vcf$variants$`#CHROM`)]))
                                            return(merged_vcf)
                                          }),
                          nm = gsub('_\\d+.vcf', '', groups[!duplicated(cluster), file]))
