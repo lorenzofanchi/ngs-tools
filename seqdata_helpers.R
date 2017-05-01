@@ -485,15 +485,15 @@ mergeVcfs = function(vcfs = NULL, somatic_vcf = NULL, germline_vcf = NULL, qual_
                                                                                     function(contig) {
                                                                                       merged_vcf$variants %>%
                                                                                         filter(!grepl(regexPatterns$gs_identifier, ID)) %>%
-                                                                                        arrange(grep(pattern = paste0('^', contig, '$'),
-                                                                                                     x =  merged_vcf$variants$`#CHROM`))
+                                                                                        filter(grep(pattern = paste0('^', contig, '$'),
+                                                                                                     x =  .$`#CHROM`))
                                                                                     }),
                                                                              lapply(contig_order,
                                                                                     function(contig) {
                                                                                       merged_vcf$variants %>%
                                                                                         filter(grepl(regexPatterns$gs_identifier, ID)) %>%
-                                                                                        arrange(grep(pattern = paste0('^', contig, '$'),
-                                                                                                     x =  merged_vcf$variants$`#CHROM`))
+                                                                                        filter(grep(pattern = paste0('^', contig, '$'),
+                                                                                                     x =  .$`#CHROM`))
                                                                                     })
                                            ))
 
