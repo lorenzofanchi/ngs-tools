@@ -413,34 +413,34 @@ mergeVcfs = function(vcfs = NULL, somatic_vcf = NULL, germline_vcf = NULL, qual_
   }
 
   # read VCFs, separate headers and variant calls
-  vcfs = setNames(object = lapply(files,
-                                  function(file) {
-                                    all_data = readLines(file)
-                                    header_data = all_data[grepl(pattern = '^#', x =  all_data)]
-                                    variant_data = fread(input = paste0(all_data[!grepl(pattern = '^#', x =  all_data)], collapse = '\n'), sep = '\t', na.strings = c('NA', 'N.A.', '.', ''))
+  parsed_vcfs = setNames(object = lapply(files,
+                                         function(file) {
+                                           all_data = readLines(file)
+                                           header_data = all_data[grepl(pattern = '^#', x =  all_data)]
+                                           variant_data = fread(input = paste0(all_data[!grepl(pattern = '^#', x =  all_data)], collapse = '\n'), sep = '\t', na.strings = c('NA', 'N.A.', '.', ''))
 
-                                    setnames(x = variant_data, unlist(strsplit(x = header_data[length(header_data)], split = '\t')))
+                                           setnames(x = variant_data, unlist(strsplit(x = header_data[length(header_data)], split = '\t')))
 
-                                    if (length(names(variant_data)) == 10) {
-                                      # replace germline sample name with 'NORMAL' to allow merging germline and tumor VCFs
-                                      message('Replacing "', names(variant_data)[10], '" with "NORMAL" in VCF "', basename(file), '" header')
-                                      setnames(x = variant_data, old = names(variant_data)[10], new = 'NORMAL')
-                                      variant_data[, TUMOR := NA]
+                                           if (length(names(variant_data)) == 10) {
+                                             # replace germline sample name with 'NORMAL' to allow merging germline and tumor VCFs
+                                             message('Replacing "', names(variant_data)[10], '" with "NORMAL" in VCF "', basename(file), '" header')
+                                             setnames(x = variant_data, old = names(variant_data)[10], new = 'NORMAL')
+                                             variant_data[, TUMOR := NA]
 
-                                      # add gs_id to germline variants
-                                      variant_data[, ID := paste0('gs', 1:.N, ';', ID)]
-                                    }
+                                             # add gs_id to germline variants
+                                             variant_data[, ID := paste0('gs', 1:.N, ';', ID)]
+                                           }
 
-                                    return(list(headers = header_data, variants = variant_data))
-                                  }),
-                  nm = basename(files))
+                                           return(list(headers = header_data, variants = variant_data))
+                                         }),
+                         nm = basename(files))
 
   if (!is.null(vcfs)) {
-    groups = data.table(file = names(vcfs),
-                        cluster = cutree(hclust(as.dist(adist(names(vcfs)))),
-                                         h = 0.1 * mean(nchar(names(vcfs)))))
+    groups = data.table(file = names(parsed_vcfs),
+                        cluster = cutree(hclust(as.dist(adist(names(parsed_vcfs)))),
+                                         h = 0.1 * mean(nchar(names(parsed_vcfs)))))
   } else {
-    groups = data.table(file = names(vcfs),
+    groups = data.table(file = names(parsed_vcfs),
                         cluster = rep(1:length(somatic_vcf), 2))
   }
 
@@ -450,24 +450,24 @@ mergeVcfs = function(vcfs = NULL, somatic_vcf = NULL, germline_vcf = NULL, qual_
                                            # make list of files to merge
                                            cluster_files = groups[cluster == clstr, file]
                                            # merge headers & variants
-                                           merged_vcf = list(headers = unique(c(grep('^##fileformat', vcfs[[cluster_files[1]]]$headers, value = T),
+                                           merged_vcf = list(headers = unique(c(grep('^##fileformat', parsed_vcfs[[cluster_files[1]]]$headers, value = T),
                                                                                 unlist(sapply(cluster_files,
-                                                                                              function(filename) grep('^##FILTER', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+                                                                                              function(filename) grep('^##FILTER', parsed_vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
                                                                                 unlist(sapply(cluster_files,
-                                                                                              function(filename) grep('^##FORMAT', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+                                                                                              function(filename) grep('^##FORMAT', parsed_vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
                                                                                 unlist(sapply(cluster_files,
-                                                                                              function(filename) grep('^##(fileformat|FILTER|FORMAT|INFO|SAMPLE|contig|reference)|^#CHROM', vcfs[[filename]]$headers, value = T, invert = T, ignore.case = T), USE.NAMES = F)),
+                                                                                              function(filename) grep('^##(fileformat|FILTER|FORMAT|INFO|SAMPLE|contig|reference)|^#CHROM', parsed_vcfs[[filename]]$headers, value = T, invert = T, ignore.case = T), USE.NAMES = F)),
                                                                                 unlist(sapply(cluster_files,
-                                                                                              function(filename) grep('^##INFO', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+                                                                                              function(filename) grep('^##INFO', parsed_vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
                                                                                 unlist(sapply(cluster_files,
-                                                                                              function(filename) grep('^##SAMPLE', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+                                                                                              function(filename) grep('^##SAMPLE', parsed_vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
                                                                                 unlist(sapply(cluster_files,
-                                                                                              function(filename) grep('^##contig', vcfs[[filename]]$headers, value = T) %>% naturalsort(.), USE.NAMES = F)),
+                                                                                              function(filename) grep('^##contig', parsed_vcfs[[filename]]$headers, value = T) %>% naturalsort(.), USE.NAMES = F)),
                                                                                 unlist(sapply(cluster_files,
-                                                                                              function(filename) grep('^##reference', vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
-                                                                                vcfs[[cluster_files[1]]]$headers[length(vcfs[[cluster_files[1]]]$headers)])),
+                                                                                              function(filename) grep('^##reference', parsed_vcfs[[filename]]$headers, value = T), USE.NAMES = F)),
+                                                                                parsed_vcfs[[cluster_files[1]]]$headers[length(parsed_vcfs[[cluster_files[1]]]$headers)])),
                                                              variants = rbindlist(lapply(cluster_files,
-                                                                                         function(filename) vcfs[[filename]]$variants), use.names = TRUE))
+                                                                                         function(filename) parsed_vcfs[[filename]]$variants), use.names = TRUE))
                                            # determine order of contigs in vcf header
                                            contig_order = str_extract(string = grep('##contig', merged_vcf$headers, value = T) %>% naturalsort(.),
                                                                       pattern = '(?<=##contig=<ID=).+(?=,)')
