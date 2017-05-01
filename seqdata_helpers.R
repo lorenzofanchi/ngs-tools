@@ -508,12 +508,16 @@ mergeVcfs = function(vcfs = NULL, somatic_vcf = NULL, germline_vcf = NULL, qual_
   invisible(sapply(1:length(merged_vcfs),
                    function(i) {
                      writeLines(text = merged_vcfs[[i]]$headers,
-                                con = if (!is.null(vcfs)) { file.path(dirname(files[1]), paste0(names(merged_vcfs)[i], '.vcf')) }
-                                else { file.path(dirname(files[1]), paste0(names(merged_vcfs)[i], '-complete-unfiltered.vcf')) },
+                                con = if (!is.null(vcfs)) { file.path(dirname(files[1]),
+                                                                      paste0(gsub('\.vcf', '', names(merged_vcfs)[i]), '.vcf')) }
+                                else { file.path(dirname(files[1]),
+                                                 paste0(gsub('\\.vcf', '', names(merged_vcfs)[i]), '-complete-unfiltered.vcf')) },
                                 sep = '\n')
                      write.table(x = merged_vcfs[[i]]$variants,
-                                 file = if (!is.null(vcfs)) { file.path(dirname(files[1]), paste0(names(merged_vcfs)[i], '.vcf')) }
-                                 else { file.path(dirname(files[1]), paste0(names(merged_vcfs)[i], '-complete-unfiltered.vcf')) },
+                                 file = if (!is.null(vcfs)) { file.path(dirname(files[1]),
+                                                                        paste0(gsub('\.vcf', '', names(merged_vcfs)[i]), '.vcf')) }
+                                 else { file.path(dirname(files[1]),
+                                                  paste0(gsub('\\.vcf', '', names(merged_vcfs)[i]), '-complete-unfiltered.vcf')) },
                                  append = T,
                                  quote = F,
                                  sep = '\t',
@@ -527,11 +531,13 @@ mergeVcfs = function(vcfs = NULL, somatic_vcf = NULL, germline_vcf = NULL, qual_
     invisible(sapply(1:length(merged_vcfs),
                      function(i) {
                        writeLines(text = merged_vcfs[[i]]$headers,
-                                  con = file.path(dirname(files[1]), paste0(names(merged_vcfs)[i], '-complete.vcf')),
+                                  con = file.path(dirname(files[1]),
+                                                  paste0(gsub('\\.vcf', '', names(merged_vcfs)[i]), '-complete.vcf')),
                                   sep = '\n')
                        write.table(x = merged_vcfs[[i]]$variants[(is.na(FILTER) | FILTER == 'PASS') # filter somatic variants for 'FILTER == PASS', take germline variants along with 'FILTER == NA'
                                                                  & (is.na(QUAL) | QUAL >= qual_cutoff)], # filter germline variants 'QUAL >= qual_cutoff', take somatic variants along with 'QUAL == NA'
-                                   file = file.path(dirname(files[1]), paste0(names(merged_vcfs)[i], '-complete.vcf')),
+                                   file = file.path(dirname(files[1]),
+                                                    paste0(gsub('\\.vcf', '', names(merged_vcfs)[i]), '-complete.vcf')),
                                    append = T,
                                    quote = F,
                                    sep = '\t',
