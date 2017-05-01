@@ -509,13 +509,13 @@ mergeVcfs = function(vcfs = NULL, somatic_vcf = NULL, germline_vcf = NULL, qual_
                    function(i) {
                      writeLines(text = merged_vcfs[[i]]$headers,
                                 con = if (!is.null(vcfs)) { file.path(dirname(files[1]),
-                                                                      paste0(gsub('\.vcf', '', names(merged_vcfs)[i]), '.vcf')) }
+                                                                      paste0(gsub('\\.vcf', '', names(merged_vcfs)[i]), '.vcf')) }
                                 else { file.path(dirname(files[1]),
                                                  paste0(gsub('\\.vcf', '', names(merged_vcfs)[i]), '-complete-unfiltered.vcf')) },
                                 sep = '\n')
                      write.table(x = merged_vcfs[[i]]$variants,
                                  file = if (!is.null(vcfs)) { file.path(dirname(files[1]),
-                                                                        paste0(gsub('\.vcf', '', names(merged_vcfs)[i]), '.vcf')) }
+                                                                        paste0(gsub('\\.vcf', '', names(merged_vcfs)[i]), '.vcf')) }
                                  else { file.path(dirname(files[1]),
                                                   paste0(gsub('\\.vcf', '', names(merged_vcfs)[i]), '-complete-unfiltered.vcf')) },
                                  append = T,
