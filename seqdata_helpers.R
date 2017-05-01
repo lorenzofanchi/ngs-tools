@@ -481,21 +481,21 @@ mergeVcfs = function(vcfs = NULL, somatic_vcf = NULL, germline_vcf = NULL, qual_
                                            contig_order = str_extract(string = grep('##contig', merged_vcf$headers, value = T) %>% naturalsort(.),
                                                                       pattern = '(?<=##contig=<ID=).+(?=,)')
                                            # sort variants by ID, then by contig order
-                                           merged_vcf$variants = rbindlist(list(lapply(contig_order,
-                                                                                       function(contig) {
-                                                                                         merged_vcf$variants %>%
-                                                                                           filter(!grepl(regexPatterns$gs_identifier, ID)) %>%
-                                                                                           arrange(grep(pattern = paste0('^', contig, '$'),
-                                                                                                        x =  merged_vcf$variants$`#CHROM`))
-                                                                                         }),
-                                                                                lapply(contig_order,
-                                                                                       function(contig) {
-                                                                                         merged_vcf$variants %>%
-                                                                                           filter(grepl(regexPatterns$gs_identifier, ID)) %>%
-                                                                                           arrange(grep(pattern = paste0('^', contig, '$'),
-                                                                                                        x =  merged_vcf$variants$`#CHROM`))
-                                                                                       })
-                                                                                ))
+                                           merged_vcf$variants = rbindlist(c(lapply(contig_order,
+                                                                                    function(contig) {
+                                                                                      merged_vcf$variants %>%
+                                                                                        filter(!grepl(regexPatterns$gs_identifier, ID)) %>%
+                                                                                        arrange(grep(pattern = paste0('^', contig, '$'),
+                                                                                                     x =  merged_vcf$variants$`#CHROM`))
+                                                                                    }),
+                                                                             lapply(contig_order,
+                                                                                    function(contig) {
+                                                                                      merged_vcf$variants %>%
+                                                                                        filter(grepl(regexPatterns$gs_identifier, ID)) %>%
+                                                                                        arrange(grep(pattern = paste0('^', contig, '$'),
+                                                                                                     x =  merged_vcf$variants$`#CHROM`))
+                                                                                    })
+                                           ))
 
                                            return(merged_vcf)
                                          }),
