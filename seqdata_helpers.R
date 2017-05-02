@@ -426,7 +426,9 @@ mergeVcfs = function(vcfs = NULL, somatic_vcf = NULL, germline_vcf = NULL, qual_
                                          function(file) {
                                            all_data = readLines(file)
                                            header_data = all_data[grepl(pattern = '^#', x =  all_data)]
-                                           variant_data = fread(input = paste0(all_data[!grepl(pattern = '^#', x =  all_data)], collapse = '\n'), sep = '\t', na.strings = c('NA', 'N.A.', '.', ''))
+                                           variant_data = fread(input = paste0(all_data[!grepl(pattern = '^#', x =  all_data)], collapse = '\n'),
+                                                                sep = '\t',
+                                                                na.strings = c('NA', 'N.A.', '.', ''))
 
                                            setnames(x = variant_data, unlist(strsplit(x = header_data[length(header_data)], split = '\t')))
 
