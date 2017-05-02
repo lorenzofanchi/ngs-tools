@@ -19,9 +19,6 @@ foreach(i = seq(1, length(fastq_files), 1)) %dopar% {
 registerDoMC(2)
 
 # perform alignments
-fastq_files = list.files(path = file.path(data_path, '1b_rnaseq_data/fastq'),
-                         full.names = TRUE)
-
 foreach(i = seq(1, length(fastq_files), 1)) %dopar% {
   performSTARAlignment(filename_one = fastq_files[i],
                        filename_two = NULL,
