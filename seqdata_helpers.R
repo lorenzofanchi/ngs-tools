@@ -438,8 +438,17 @@ mergeVcfs = function(vcfs = NULL, somatic_vcf = NULL, germline_vcf = NULL, qual_
                                              setnames(x = variant_data, old = names(variant_data)[10], new = 'NORMAL')
                                              variant_data[, TUMOR := NA]
 
+                                             # sort variants to natural chromosome order
+                                             variant_data = variant_data %>%
+                                               .[naturalorder(.$`#CHROM`), ]
+
                                              # add gs_id to germline variants
-                                             variant_data[, ID := paste0('gs', 1:.N, ';', ID)]
+                                             variant_data[, ID := sapply(seq(1, .N),
+                                                                         function(row_idx)
+                                                                         {
+                                                                           if (is.na(variant_data[row_idx, ID])) {paste0('gs', row_idx)}
+                                                                           else {paste0('gs', row_idx, ';', variant_data[row_idx, ID])}
+                                                                         })]
                                            }
 
                                            return(list(headers = header_data, variants = variant_data))
